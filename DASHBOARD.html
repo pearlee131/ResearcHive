@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ResearchHive</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="LOGO.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background-color: #f8fbff;
+            overflow-x: hidden;
+        }
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -230px;
+            width: 230px;
+            height: 100%;
+            background-color: #d8e9ff;
+            transition: left 0.3s ease;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .sidebar.active { left: 0; }
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            font-weight: bold;
+            color: #002b5b;
+            font-size: 18px;
+        }
+        .sidebar-header img {
+            height: 35px;
+            width: 35px;
+            margin-right: 8px;
+        }
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            text-decoration: none;
+            color: #002b5b;
+            font-weight: bold;
+            transition: background 0.2s, color 0.2s;
+        }
+        .sidebar a:hover {
+            background-color: #002b5b;
+            color: #ffffff;
+        }
+        .sidebar a.active-link {
+            background-color: #002b5b;
+            color: #ffffff;
+        }
+        .sidebar a i { margin-right: 10px; }
+        .sidebar-section-gap {
+            margin: 5px 0;
+            border-top: 2px solid #a5c0ff;
+        }
+        
+        /* Topbar */
+        .topbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background-color: #e8f1ff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1001;
+        }
+        .menu-toggle {
+            font-size: 24px;
+            cursor: pointer;
+            color: #002b5b;
+            margin-right: 10px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            font-size: 20px;
+            color: #002b5b;
+        }
+        .logo img {
+            height: 30px;
+            margin-right: 8px;
+        }
+        .admin-profile {
+            position: relative;
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            color: #002b5b;
+            cursor: pointer;
+        }
+        
+        .admin-profile-dropdown {
+            position: absolute;
+            top: calc(100% + 5px);
+            right: 0;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            min-width: 150px;
+            z-index: 1002;
+            display: none; 
+        }
+        .admin-profile-dropdown a {
+            color: #002b5b;
+            padding: 10px 15px;
+            text-decoration: none;
+            display: flex; 
+            align-items: center; 
+            font-weight: normal;
+        }
+        .admin-profile-dropdown a i { margin-right: 8px; }
+        .admin-profile-dropdown a:hover { background-color: #f0f6ff; }
+        
+        .main {
+            margin-top: 75px;
+            margin-left: 20px;
+            margin-right: 20px;
+            padding: 20px;
+            transition: margin-left 0.3s ease;
+            min-height: calc(93vh - 40px); 
+            display: flex;
+            flex-direction: column;
+        }
+        .main.shifted { margin-left: 230px; }
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            flex-grow: 1;
+        }
+        .card {
+            border: 2px solid #002b5b;
+            border-radius: 8px;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end; 
+            justify-content: flex-end; 
+            font-weight: bold;
+            color: #002b5b;
+            min-height: 250px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            text-align: center; 
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            background-size: cover;
+            background-position: center;
+        }
+        .card:hover { transform: scale(1.05); }
+        .card i {
+            font-size: 50px;
+            color: #002b5b; 
+            z-index: 1; 
+        }
+         .dept-card i {
+            margin-bottom: 20px;
+            margin-left: 30px;
+            margin-right: 40px;
+        }
+        .program-card i {
+            margin-bottom: 20px;
+            margin-left: 20px;
+            margin-right: 25px;
+        }
+        .research-card i {
+            margin-bottom: 20px;
+            margin-left: 15px;
+            margin-right: 35px;
+        }
+        .stats-card i {
+            margin-bottom: 20px;
+            margin-left: 50px;
+            margin-right: 15px;
+        }
+        .card .card-content { z-index: 1; }
+        .card span {
+            display: block;
+            font-size: 3em;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <img src="LOGO.png" alt="Logo">
+        ResearcHive
+    </div>
+    <a href="DASHBOARD.HTML" class="active-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+    <div class="sidebar-section-gap"></div>
+    <a href="DEPT.html"><i class="fas fa-building"></i> Department List</a>
+    <a href="PROGRAM.html"><i class="fas fa-graduation-cap"></i> Program List</a>
+    <a href="MANUSCRIPT.html"><i class="fas fa-folder-open"></i> Research Profile</a>
+    <a href="STAT.html"><i class="fas fa-chart-bar"></i> Statistics</a>
+    <a href="SETTING.html"><i class="fas fa-cog"></i> Settings</a>
+</div>
+
+<div class="topbar">
+   <div class="logo">
+  <i class="fas fa-bars menu-toggle" id="menuToggle"></i>
+  <a href="DASHBOARD.html" style="display:flex; align-items:center; text-decoration:none; color:inherit;">
+    <img src="LOGO.png" alt="Logo">
+    <span style="font-weight:bold; font-size:20px; margin-left:8px;">ResearcHive</span>
+  </a>
+</div>
+
+    <div class="admin-profile" id="adminProfileBtn">
+        <i class="fas fa-user-circle"></i>&nbsp; <span id="adminName">Admin</span>
+        <div class="admin-profile-dropdown" id="adminDropdown">
+            <a href="LOGIN.HTML"><i class="fas fa-sign-out-alt"></i> Log Out</a>
+        </div>
+    </div>
+</div>
+
+<div class="main" id="main">
+    <div class="cards">
+        <div class="card dept-card" style="background-image: url('DL.png');" onclick="location.href='DEPT.html'">
+            <i class="fas fa-building"></i>
+            <div class="card-content">
+                Department List <br> <span id="dept-count">0</span>
+            </div>
+        </div>
+        <div class="card program-card" style="background-image: url('PL.png');" onclick="location.href='PROGRAM.html'">
+            <i class="fas fa-graduation-cap"></i>
+            <div class="card-content">
+                Program List <br> <span id="program-count">0</span>
+            </div>
+        </div>
+        <div class="card research-card" style="background-image: url('RP.png');" onclick="location.href='MANUSCRIPT.html'">
+            <i class="fas fa-folder-open"></i>
+            <div class="card-content">
+                Research Profile <br> <span id="manuscript-count">0</span>
+            </div>
+        </div>
+        <div class="card stats-card" style="background-image: url('S.png');" onclick="location.href='STAT.html'">
+            <i class="fas fa-chart-bar"></i>
+            <div class="card-content">
+                Statistics <br> <span id="stats-count">0</span>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  
+  const SUPABASE_URL = "https://ckuhctjmvpxffyprmatx.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrdWhjdGptdnB4ZmZ5cHJtYXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3MDMzNDUsImV4cCI6MjA3MTI3OTM0NX0.n6YLr6jnZdj4HtIWao7iOh2kygEpfqph-eZW37k8BWg";
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // --- 🔹 Restore local profile ---
+  const storedProfile = localStorage.getItem("rh_profile");
+  let profile = null;
+  if (storedProfile) {
+    try {
+      profile = JSON.parse(storedProfile);
+    } catch {}
+  }
+
+  // --- 🔹 Sidebar toggle ---
+  const menuToggle = document.getElementById("menuToggle");
+  const sidebar = document.getElementById("sidebar");
+  const mainContent = document.getElementById("main");
+
+  if (menuToggle) {
+    menuToggle.addEventListener("click", () => {
+      sidebar.classList.toggle("active");
+      mainContent.classList.toggle("shifted");
+    });
+  }
+
+  // --- 🔹 Admin dropdown toggle ---
+  const adminProfileBtn = document.getElementById("adminProfileBtn");
+  const adminDropdown = document.getElementById("adminDropdown");
+  const adminNameEl = document.getElementById("adminName");
+
+  if (adminProfileBtn) {
+    adminProfileBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      adminDropdown.style.display =
+        adminDropdown.style.display === "block" ? "none" : "block";
+    });
+    window.addEventListener("click", (e) => {
+      if (!adminProfileBtn.contains(e.target)) {
+        adminDropdown.style.display = "none";
+      }
+    });
+  }
+
+  // --- 🔹 Display user name/role ---
+  if (profile) {
+    const deptName = profile.department_name || "";
+    let label = "Admin";
+    if (profile.role === "super_admin") label = "Librarian";
+    else if (profile.role === "admin" && deptName) label = `${deptName} Admin`;
+    if (adminNameEl) adminNameEl.textContent = label;
+  }
+
+  // --- 🔹 Verify Supabase user session ---
+  const { data: userData } = await supabaseClient.auth.getUser();
+  const user = userData?.user;
+  if (!user && !profile) {
+    console.warn("No user found, redirecting...");
+    window.location.href = "LOGIN.html";
+    return;
+  }
+
+  supabaseClient.auth.onAuthStateChange((event) => {
+    if (event === "SIGNED_OUT" && !localStorage.getItem("rh_profile")) {
+      console.warn("Session ended, redirecting...");
+      window.location.href = "LOGIN.html";
+    }
+  });
+
+  // --- 🧩 Load Dashboard Data (now inside same scope) ---
+  async function loadDashboardData() {
+    const deptCountEl = document.getElementById("dept-count");
+    const programCountEl = document.getElementById("program-count");
+    const manuscriptCountEl = document.getElementById("manuscript-count");
+    const statsCountEl = document.getElementById("stats-count");
+
+    if (!profile) return;
+
+    try {
+      const deptName = profile.department_name || "";
+      const isSuperAdmin = profile.role === "super_admin";
+
+      // 1️⃣ Department Count
+      const { count: deptCount } = await supabaseClient
+        .from("departments")
+        .select("*", { count: "exact", head: true });
+
+      // 2️⃣ Program Count
+      let programQuery = supabaseClient
+        .from("programs")
+        .select("*", { count: "exact", head: true });
+      if (!isSuperAdmin && deptName)
+        programQuery = programQuery.eq("department", deptName);
+      const { count: programCount } = await programQuery;
+
+      // 3️⃣ Research Profile Count
+      let manuscriptQuery = supabaseClient
+        .from("manuscripts")
+        .select("*", { count: "exact", head: true });
+      if (!isSuperAdmin && deptName)
+        manuscriptQuery = manuscriptQuery.eq("department", deptName);
+      const { count: manuscriptCount } = await manuscriptQuery;
+
+      // 4️⃣ Stats Count (same as manuscripts)
+      const statsCount = 3;
+
+      // --- Update UI ---
+      deptCountEl.textContent = deptCount ?? 0;
+      programCountEl.textContent = programCount ?? 0;
+      manuscriptCountEl.textContent = manuscriptCount ?? 0;
+      statsCountEl.textContent = statsCount ?? 0;
+    } catch (err) {
+      console.error("Error loading dashboard data:", err);
+    }
+  }
+
+  // --- ✅ Finally, load data ---
+  await loadDashboardData();
+});
+</script>
+
+
+</body>
+</html>

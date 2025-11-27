@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ResearcHive</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="LOGO.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { background-color: #f8fbff; overflow-x: hidden; font-size: 16px; }
+
+    .sidebar { position: fixed; top: 0; left: -230px; width: 230px; height: 100%; background-color: #d8e9ff; box-shadow: 2px 0 5px rgba(0,0,0,0.1); z-index: 1000; transition: left 0.3s ease; }
+    .sidebar.active { left: 0; }
+    .sidebar-header { display: flex; align-items: center; padding: 10px; font-weight: bold; color: #002b5b; font-size: 18px; }
+    .sidebar-header img { height: 35px; width: 35px; margin-right: 8px; }
+    .sidebar a { display: flex; align-items: center; padding: 12px 20px; text-decoration: none; color: #002b5b; font-weight: bold; font-size: 15px; }
+    .sidebar a:hover, .sidebar a.active-link { background-color: #002b5b; color: #ffffff; }
+    .sidebar a i { margin-right: 10px; }
+    .sidebar-section-gap { margin: 5px 0; border-top: 2px solid #a5c0ff; }
+
+    .topbar { position: fixed; top: 0; left: 0; right: 0; height: 60px; background-color: #e8f1ff; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 1001; }
+    .logo { display: flex; align-items: center; font-weight: bold; font-size: 20px; color: #002b5b; }
+    .logo img { height: 30px; margin-right: 8px; }
+    .menu-toggle { font-size: 20px; color: #002b5b; cursor: pointer; margin-right: 10px; }
+
+    .admin-profile { position: relative; display: flex; align-items: center; font-weight: bold; color: #002b5b; cursor: pointer; }
+    .admin-profile-dropdown {
+        position: absolute;
+        top: calc(100% + 5px);
+        right: 0;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        border-radius: 5px;
+        min-width: 150px;
+        z-index: 1002;
+        display: none;
+    }
+    .admin-profile-dropdown a {
+        color: #002b5b;
+        padding: 10px 15px;
+        text-decoration: none;
+        display: block;
+        font-weight: normal;
+    }
+    .admin-profile-dropdown a:hover { background-color: #f0f6ff; }
+    .admin-profile-dropdown a i { margin-right: 8px; }
+
+    .main { margin-top: 80px; padding: 20px; transition: margin-left 0.3s ease; }
+    .main.active { margin-left: 230px; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; border: 2px solid #002b5b; padding: 10px; font-weight: bold; color: #002b5b; font-size: 18px; margin-bottom: 10px; }
+    .btn-add { background-color: #1e73be; color: #fff; padding: 6px 14px; font-size: 15px; border: none; border-radius: 3px; cursor: pointer; }
+    .btn-add:hover { background-color: #005bb5; }
+
+    .search-bar { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 10px; gap: 5px; }
+    .search-bar input { border: 2px solid #002b5b; padding: 6px; font-size: 15px; border-radius: 3px; }
+    .search-bar button { background-color: #002b5b; color: white; border: none; padding: 7px 12px; border-radius: 3px; cursor: pointer; font-size: 15px; }
+    .search-bar button:hover { background-color: #004080; }
+
+    table { width: 100%; border-collapse: collapse; border: 2px solid #002b5b; font-size: 16px; }
+    th, td {
+        padding: 10px;
+        border: 1px solid #002b5b;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    th { background-color: #e8f1ff; font-weight: bold; }
+
+    .dropdown { position: relative; display: inline-block; }
+    .dropdown-btn {
+        background-color: #fff;
+        color: #002b5b;
+        border: 2px solid #1e73be;
+        padding: 6px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.2s ease;
+    }
+    .dropdown-btn:hover { background-color: #e8f1ff; }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background-color: #fff;
+        border: 2px solid #1e73be;
+        border-radius: 4px;
+        min-width: 100px;
+        z-index: 100;
+        overflow: hidden;
+        box-shadow: 2px 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .dropdown-content a {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        text-decoration: none;
+        color: #002b5b;
+        font-size: 15px;
+        font-weight: bold;
+        border-bottom: 1px solid #1e73be;
+        background-color: #f8fbff;
+    }
+    .dropdown-content a:last-child { border-bottom: none; }
+    .dropdown-content a:hover { background-color: #e8f1ff; }
+    .dropdown.show .dropdown-content { display: block; } /* This CSS is correct */
+
+    .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); justify-content: center; align-items: center; }
+    .modal-content { background: white; border: 2px solid #002b5b; border-radius: 8px; padding: 20px; width: 400px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    .modal-header { display: flex; align-items: center; font-size: 18px; font-weight: bold; color: #002b5b; margin-bottom: 15px; }
+    .modal-header i { margin-right: 8px; font-size: 20px; }
+    .modal label { font-weight: bold; color: #002b5b; display: block; margin-top: 10px; margin-bottom: 5px; }
+    .modal input, .modal select { width: 100%; padding: 8px; border: 2px solid #002b5b; border-radius: 4px; font-size: 15px; }
+    .modal-buttons { margin-top: 15px; display: flex; justify-content: space-between; }
+    .modal-buttons button { padding: 6px 14px; font-size: 15px; border-radius: 4px; cursor: pointer; border: none; }
+    .btn-cancel { background: none; color: #002b5b; font-weight: bold; border: 2px solid transparent; }
+    .btn-save { background-color: #1e73be; color: white; }
+    .btn-save:hover { background-color: #005bb5; }
+
+    .success-modal {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 3000;
+        display: none;
+        animation: slideDown 0.5s ease-out;
+    }
+    .success-modal-content {
+        background-color: #e8f1ff;
+        border: 2px solid #002b5b;
+        border-radius: 50px;
+        padding: 10px 30px;
+        text-align: center;
+        font-weight: bold;
+        color: #002b5b;
+        font-size: 18px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        width: fit-content;
+    }
+    @keyframes slideDown { 0% { top: -100px; opacity: 0; } 100% { top: 20px; opacity: 1; } }
+
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+    .shake { animation: shake 0.5s; }
+</style>
+</head>
+<body>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <img src="LOGO.png" alt="Logo"> ResearcHive
+    </div>
+    <a href="DASHBOARD.HTML"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+    <div class="sidebar-section-gap"></div>
+    <a href="DEPT.html"><i class="fas fa-building"></i> Department List</a>
+    <a href="PROGRAM.html" class="active-link"><i class="fas fa-graduation-cap"></i> Program List</a>
+    <a href="MANUSCRIPT.html"><i class="fas fa-folder-open"></i> Research Profile</a>
+    <a href="STAT.html"><i class="fas fa-chart-bar"></i> Statistics</a>
+    <a href="SETTING.html"><i class="fas fa-cog"></i> Settings</a>
+</div>
+
+<div class="topbar">
+   <div class="logo">
+  <i class="fas fa-bars menu-toggle" id="menuToggle"></i>
+  <a href="DASHBOARD.html" style="display:flex; align-items:center; text-decoration:none; color:inherit;">
+    <img src="LOGO.png" alt="Logo">
+    <span style="font-weight:bold; font-size:20px; margin-left:8px;">ResearcHive</span>
+  </a>
+</div>
+
+    <div class="admin-profile" id="adminProfileBtn">
+        <i class="fas fa-user-circle"></i>&nbsp; Admin
+        <div class="admin-profile-dropdown" id="adminDropdown">
+            <a href="LOGIN.HTML"><i class="fas fa-sign-out-alt"></i> Log Out</a>
+        </div>
+    </div>
+</div>
+
+<div class="main" id="mainContent">
+    <div class="page-header">
+        Program List
+        <button class="btn-add" id="addProgramBtn">+ Add New Program</button>
+    </div>
+
+    <div class="search-bar">
+        <input type="text" placeholder="Search..." id="searchInput">
+        <button><i class="fas fa-search"></i></button>
+    </div>
+
+    <table id="programTable">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Department</th>
+                <th>Program Name</th>
+                <th>Description</th>
+                <th>Majors</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<div class="modal" id="programModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <i class="fas fa-graduation-cap"></i> Program Details
+        </div>
+        <label for="deptSelect">Department</label>
+        <select id="deptSelect"></select>
+        <label for="programName">Program Name</label>
+        <input type="text" id="programName">
+        <label for="programDesc">Description</label>
+        <input type="text" id="programDesc">
+        <label for="numMajors">Number of Majors</label>
+        <input type="number" id="numMajors" min="0" placeholder="Enter number of majors">
+        <div id="majorsContainer"></div>
+        <div class="modal-buttons">
+            <button class="btn-cancel" id="cancelModal">Cancel</button>
+            <button class="btn-save" id="saveProgram">Save</button>
+        </div>
+    </div>
+</div>
+
+<div id="successModal" class="success-modal">
+    <div class="success-modal-content"></div>
+</div>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+const supabaseUrl = 'https://ckuhctjmvpxffyprmatx.supabase.co'
+const supabaseKey = 'sb_publishable_XFIckb3Yy0b6cW9VumLWDA_YcT7tfRT'
+const supabase = createClient(supabaseUrl, supabaseKey)
+
+const modal = document.getElementById("programModal");
+const successModal = document.getElementById("successModal");
+const addBtn = document.getElementById("addProgramBtn");
+const cancelBtn = document.getElementById("cancelModal");
+const saveBtn = document.getElementById("saveProgram");
+const sidebar = document.getElementById("sidebar");
+const mainContent = document.getElementById("mainContent");
+const menuToggle = document.getElementById("menuToggle");
+const adminProfileBtn = document.getElementById("adminProfileBtn");
+let adminDropdown = document.getElementById("adminDropdown");
+const deptSelect = document.getElementById("deptSelect");
+const searchInput = document.getElementById("searchInput");
+const numMajorsInput = document.getElementById("numMajors");
+const majorsContainer = document.getElementById("majorsContainer");
+const programTableBody = document.querySelector("#programTable tbody");
+
+let editId = null;
+
+// ---------- Role info from localStorage ----------
+let currentUserRole = null;
+let currentUserDeptId = null;       // what login saved as department_id (could be id or name)
+let currentUserDeptName = null;     // resolved department name string
+
+const storedProfile = localStorage.getItem("rh_profile");
+if (storedProfile) {
+    try {
+        const profile = JSON.parse(storedProfile);
+        currentUserRole = profile.role || null;
+        currentUserDeptId = profile.department_id ?? profile.department_name ?? null;
+        // show display name in header (preserve your original behavior)
+        let displayName = (profile.full_name || "Admin").replace("Coordinator", "Admin");
+        const dropdownHTML = `
+            <div class="admin-profile-dropdown" id="adminDropdown">
+                <a href="LOGIN.HTML"><i class="fas fa-sign-out-alt"></i> Log Out</a>
+            </div>`;
+        adminProfileBtn.innerHTML = `<i class="fas fa-user-circle"></i>&nbsp; ${displayName} ${dropdownHTML}`;
+        adminDropdown = document.getElementById("adminDropdown");
+    } catch (err) {
+        console.error("Invalid rh_profile in localStorage", err);
+    }
+}
+
+// ---------- helper: resolve department name for current admin ----------
+async function resolveUserDeptName() {
+    if (!currentUserRole || currentUserRole !== "admin") return;
+    if (!currentUserDeptId) return;
+
+    // Try to fetch departments by id (if id is numeric/uuid). If not found, assume it's already a name.
+    try {
+        const { data: dept, error } = await supabase
+            .from('departments')
+            .select('id, department_name')
+            .eq('id', currentUserDeptId)
+            .single();
+
+        if (!error && dept && dept.department_name) {
+            currentUserDeptName = dept.department_name;
+            return;
+        }
+    } catch (err) {
+        // ignore — fallback below
+    }
+
+    // Fallback: maybe department_id already contains the department name
+    currentUserDeptName = String(currentUserDeptId);
+}
+
+// ---------- Fetch departments (but restrict if admin) ----------
+async function fetchDepartments() {
+    try {
+        const { data, error } = await supabase.from('departments').select('id, department_name');
+        if (error) { console.error("fetchDepartments error:", error); return; }
+
+        deptSelect.innerHTML = '';
+
+        if (currentUserRole === 'admin') {
+            // If admin, show only their department and disable the select so they can't change it.
+            if (!currentUserDeptName) {
+                // no dept resolved — show nothing (admin has no permissions)
+                deptSelect.disabled = true;
+                return;
+            }
+            const match = data.find(d =>
+                d.department_name.toLowerCase().trim() === currentUserDeptName.toLowerCase().trim()
+                || String(d.id) === String(currentUserDeptId)
+            );
+            if (match) {
+                const option = document.createElement('option');
+                option.value = match.department_name;
+                option.textContent = match.department_name;
+                deptSelect.appendChild(option);
+                deptSelect.value = match.department_name;
+                deptSelect.disabled = true;
+            } else {
+                // weird case: department not found in table — disable select
+                deptSelect.disabled = true;
+            }
+        } else {
+            // super_admin (or other roles): show all departments, select enabled
+            data.forEach(dept => {
+                const option = document.createElement('option');
+                option.value = dept.department_name;
+                option.textContent = dept.department_name;
+                deptSelect.appendChild(option);
+            });
+            deptSelect.disabled = false;
+        }
+    } catch (err) {
+        console.error("Error loading departments:", err);
+    }
+}
+
+// ---------- Fetch programs (and only show edit for allowed ones) ----------
+async function fetchPrograms() {
+    const { data, error } = await supabase.from('programs').select(`id, program_name, description, department, majors`);
+    if (error) { console.error("Error fetching programs:", error); return; }
+
+    programTableBody.innerHTML = '';
+
+    const filter = (searchInput.value || '').toLowerCase();
+
+    data.forEach((program, index) => {
+        const deptName = program.department || "";
+        const programNameLower = (program.program_name || "").toLowerCase();
+        const descLower = (program.description || "").toLowerCase();
+        const majorsLower = (program.majors || "").toLowerCase();
+        // filter rows
+        if (!(programNameLower.includes(filter) || deptName.toLowerCase().includes(filter) || descLower.includes(filter) || majorsLower.includes(filter))) {
+            return;
+        }
+
+        // determine if current user can edit this row:
+        let isEditable = false;
+        if (currentUserRole === 'super_admin') isEditable = true;
+        else if (currentUserRole === 'admin' && currentUserDeptName) {
+            if (deptName.toLowerCase().trim() === currentUserDeptName.toLowerCase().trim()) isEditable = true;
+        }
+
+        const majorsDisplay = program.majors ? program.majors : "";
+        const row = document.createElement("tr");
+        row.dataset.id = program.id;
+        row.dataset.department = program.department;
+        row.dataset.programName = program.program_name;
+        row.dataset.description = program.description || "";
+        row.dataset.majors = program.majors || "";
+
+        // If editable show the action menu; otherwise show a disabled/no-action label
+        const actionHTML = isEditable ? `
+            <div class="dropdown">
+                <button class="dropdown-btn">Action <i class="fas fa-caret-down"></i></button>
+                <div class="dropdown-content">
+                    <a href="#" class="edit-btn" data-id="${program.id}"><i class="fas fa-edit"></i> Edit</a>
+                </div>
+            </div>` : `<span style="color:#888; font-weight:bold;">No Actions</span>`;
+
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${program.department}</td>
+            <td>${program.program_name}</td>
+            <td>${program.description || ""}</td>
+            <td>${majorsDisplay}</td>
+            <td>${actionHTML}</td>
+        `;
+        programTableBody.appendChild(row);
+    });
+}
+
+// search input hook
+searchInput.addEventListener("input", fetchPrograms);
+
+// dropdown and edit button handling (delegated)
+function closeAllDropdowns() {
+    document.querySelectorAll('.dropdown.show').forEach(openDropdown => openDropdown.classList.remove('show'));
+}
+
+programTableBody.addEventListener('click', (e) => {
+    const dropdownBtn = e.target.closest('.dropdown-btn');
+    if (dropdownBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const dropdown = dropdownBtn.closest('.dropdown');
+        document.querySelectorAll('.dropdown.show').forEach(openDropdown => {
+            if (openDropdown !== dropdown) openDropdown.classList.remove('show');
+        });
+        dropdown.classList.toggle('show');
+        return;
+    }
+
+    const editBtn = e.target.closest('.edit-btn');
+    if (editBtn) {
+        e.preventDefault();
+        const row = editBtn.closest('tr');
+        const id = row.dataset.id;
+        const programName = row.dataset.programName;
+        const description = row.dataset.description;
+        const department = row.dataset.department;
+        const majorsString = row.dataset.majors;
+
+        // extra safety: do not allow admin to edit other dept programs
+        if (currentUserRole === 'admin' && currentUserDeptName) {
+            if (String(department).toLowerCase().trim() !== String(currentUserDeptName).toLowerCase().trim()) {
+                showError("You are not allowed to edit programs from other departments.");
+                closeAllDropdowns();
+                return;
+            }
+        }
+
+        editProgram(id, department, programName, description, majorsString);
+        closeAllDropdowns();
+    }
+});
+
+// ------ modal helpers and majors handling ------
+numMajorsInput.addEventListener("input", () => {
+    majorsContainer.innerHTML = "";
+    const count = parseInt(numMajorsInput.value) || 0;
+    for (let i = 0; i < count; i++) {
+        const label = document.createElement("label");
+        label.textContent = `Major ${i + 1}`;
+        const input = document.createElement("input");
+        input.type = "text";
+        input.classList.add("major-input");
+        majorsContainer.appendChild(label);
+        majorsContainer.appendChild(input);
+    }
+});
+
+function editProgram(id, department, name, desc, majorsString) {
+    editId = id;
+    document.getElementById("programName").value = name;
+    document.getElementById("programDesc").value = desc;
+    deptSelect.value = department;
+    
+    // extra safety: if admin and not samedept, refuse
+    if (currentUserRole === 'admin' && currentUserDeptName) {
+        if (String(department).toLowerCase().trim() !== String(currentUserDeptName).toLowerCase().trim()) {
+            showError("You are not allowed to edit this program.");
+            editId = null;
+            return;
+        }
+    }
+
+    majorsContainer.innerHTML = "";
+    const majorsArray = majorsString ? majorsString.split(',').map(m => m.trim()) : [];
+    numMajorsInput.value = majorsArray.length;
+
+    majorsArray.forEach((major, index) => {
+        const label = document.createElement("label");
+        label.textContent = `Major ${index + 1}`;
+        const input = document.createElement("input");
+        input.type = "text";
+        input.classList.add("major-input");
+        input.value = major;
+        majorsContainer.appendChild(label);
+        majorsContainer.appendChild(input);
+    });
+
+    modal.style.display = "flex";
+}
+
+// Add program button
+addBtn.addEventListener("click", () => {
+    // If not logged or not allowed, disable
+    if (!currentUserRole) {
+        showError("You must be logged in to add a program.");
+        return;
+    }
+    // When admin clicks add: deptSelect should already be restricted by fetchDepartments
+    editId = null;
+    if (deptSelect.options.length > 0) deptSelect.selectedIndex = 0;
+    document.getElementById("programName").value = "";
+    document.getElementById("programDesc").value = "";
+    numMajorsInput.value = "";
+    majorsContainer.innerHTML = "";
+    modal.style.display = "flex";
+});
+
+// Cancel modal
+cancelBtn.addEventListener("click", () => {
+    modal.style.display = "none";
+    editId = null;
+    numMajorsInput.value = "";
+    majorsContainer.innerHTML = "";
+});
+
+// Save program (insert/update) with role checks
+saveBtn.addEventListener("click", async () => {
+    const program_name = document.getElementById("programName").value.trim();
+    const description = document.getElementById("programDesc").value.trim();
+    const department = deptSelect.value;
+    const majors = Array.from(document.querySelectorAll(".major-input"))
+        .map(input => input.value.trim())
+        .filter(val => val !== "")
+        .join(", ");
+
+    if (!program_name && !description) { showError("Add Program Details!"); return; }
+    if (!department) { showError("Select a Department!"); return; }
+    if (!program_name) { showError("Add Program Name!"); return; }
+    if (!description) { showError("Add Program Description!"); return; }
+
+    // ROLE CHECK: admin may only create/update programs for their own department
+    if (currentUserRole === 'admin' && currentUserDeptName) {
+        if (String(department).toLowerCase().trim() !== String(currentUserDeptName).toLowerCase().trim()) {
+            showError("Admins can only add/edit programs in their own department.");
+            return;
+        }
+    }
+
+    try {
+        // Check duplicates (name)
+        let nameQuery = supabase.from("programs").select("id").eq("program_name", program_name);
+        if (editId) nameQuery = nameQuery.neq("id", editId);
+        const { data: existingName, error: nameError } = await nameQuery;
+        if (nameError) throw nameError;
+        if (existingName && existingName.length > 0) { showError("Program Name already exists!"); return; }
+
+        // Check duplicates (description) for inserts
+        if (!editId) {
+            const { data: existingDesc, error: descError } = await supabase.from("programs").select("id").eq("description", description);
+            if (descError) throw descError;
+            if (existingDesc && existingDesc.length > 0) { showError("Program Description already exists!"); return; }
+        }
+
+        if (editId) {
+            // extra safety: ensure the original program belongs to this dept when admin is editing
+            if (currentUserRole === 'admin') {
+                const { data: orig, error: origErr } = await supabase.from("programs").select("department").eq("id", editId).single();
+                if (origErr) throw origErr;
+                if (String(orig.department).toLowerCase().trim() !== String(currentUserDeptName).toLowerCase().trim()) {
+                    showError("You are not allowed to update this program.");
+                    return;
+                }
+            }
+
+            const { error } = await supabase
+                .from("programs")
+                .update({ program_name, description, department, majors })
+                .eq("id", editId);
+            if (error) throw error;
+            showSuccess("Program updated successfully!");
+        } else {
+            const { error } = await supabase
+                .from("programs")
+                .insert({ program_name, description, department, majors });
+            if (error) throw error;
+            showSuccess("Program added successfully!");
+        }
+
+        modal.style.display = "none";
+        editId = null;
+        numMajorsInput.value = "";
+        majorsContainer.innerHTML = "";
+        fetchPrograms();
+
+    } catch (err) {
+        console.error("Error saving program:", err);
+        showError("An error occurred while saving the program. See console.");
+    }
+});
+
+// success / error helpers
+function showSuccess(message) {
+    successModal.querySelector(".success-modal-content").textContent = message;
+    successModal.style.display = "block";
+    setTimeout(() => { successModal.style.display = "none"; }, 2000);
+}
+function showError(message) {
+    const modalContent = document.querySelector("#programModal .modal-content");
+    modalContent.classList.add("shake");
+    successModal.querySelector(".success-modal-content").textContent = message;
+    successModal.style.display = "block";
+    setTimeout(() => {
+        modalContent.classList.remove("shake");
+        successModal.style.display = "none";
+    }, 1500);
+}
+
+// Close modal on outside click / Esc
+window.addEventListener("click", (e) => {
+    if (e.target === modal) { modal.style.display = "none"; editId = null; }
+});
+window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modal.style.display === "flex") { modal.style.display = "none"; editId = null; }
+});
+
+// Sidebar toggle / admin dropdown
+menuToggle.addEventListener("click", () => {
+    sidebar.classList.toggle("active");
+    mainContent.classList.toggle("active");
+});
+adminProfileBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    adminDropdown.style.display = adminDropdown.style.display === "block" ? "none" : "block";
+});
+window.addEventListener("click", (e) => {
+    if (!adminProfileBtn.contains(e.target)) adminDropdown.style.display = "none";
+    if (!e.target.closest('.dropdown')) closeAllDropdowns();
+});
+
+// ---------- Initialization ----------
+async function init() {
+    await resolveUserDeptName();
+    await fetchDepartments();
+    await fetchPrograms();
+
+    // If the user isn't logged in, hide the add button to prevent confusion
+    if (!currentUserRole) {
+        addBtn.style.display = "none";
+    } else {
+        addBtn.style.display = "inline-block";
+    }
+}
+init();
+
+</script>
+
+
+</body>
+</html>

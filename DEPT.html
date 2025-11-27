@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ResearcHive</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="icon" type="image/png" href="LOGO.png">
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { background-color: #f8fbff; overflow-x: hidden; font-size: 16px; }
+
+    /* Sidebar */
+    .sidebar { position: fixed; top: 0; left: -230px; width: 230px; height: 100%; background-color: #d8e9ff; box-shadow: 2px 0 5px rgba(0,0,0,0.1); z-index: 1000; transition: left 0.3s ease; }
+    .sidebar.active { left: 0; }
+    .sidebar-header { display: flex; align-items: center; padding: 10px; font-weight: bold; color: #002b5b; font-size: 18px; }
+    .sidebar-header img { height: 35px; width: 35px; margin-right: 8px; }
+    .sidebar a { display: flex; align-items: center; padding: 12px 20px; text-decoration: none; color: #002b5b; font-weight: bold; font-size: 15px; }
+    .sidebar a:hover, .sidebar a.active-link { background-color: #002b5b; color: #ffffff; }
+    .sidebar a i { margin-right: 10px; }
+    .sidebar-section-gap { margin: 5px 0; border-top: 2px solid #a5c0ff; }
+
+    /* Topbar */
+    .topbar { position: fixed; top: 0; left: 0; right: 0; height: 60px; background-color: #e8f1ff; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 1001; }
+    .logo { display: flex; align-items: center; font-weight: bold; font-size: 20px; color: #002b5b; }
+    .logo img { height: 30px; margin-right: 8px; }
+    .menu-toggle { font-size: 20px; color: #002b5b; cursor: pointer; margin-right: 10px; }
+
+    /* User Profile */
+    .user-profile { position: relative; cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: bold; color: #002b5b; }
+    .profile-dropdown { position: absolute; top: 100%; right: 0; background-color: #f8fbff; border: 1px solid #002b5b; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); min-width: 150px; margin-top: 10px; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: opacity 0.2s ease, transform 0.2s ease; }
+    .profile-dropdown.show { opacity: 1; visibility: visible; transform: translateY(0); }
+    .profile-dropdown a { display: block; padding: 10px; text-decoration: none; color: #002b5b; font-weight: normal; border-bottom: 1px solid #d8e9ff; }
+    .profile-dropdown a:last-child { border-bottom: none; }
+    .profile-dropdown a:hover { background-color: #d8e9ff; }
+    .profile-dropdown i { margin-right: 8px; }
+
+    /* Main content */
+    .main { margin-top: 80px; padding: 20px; transition: margin-left 0.3s ease; }
+    .main.active { margin-left: 230px; }
+
+    .page-header { display: flex; align-items: center; justify-content: space-between; border: 2px solid #002b5b; padding: 10px; font-weight: bold; color: #002b5b; font-size: 18px; margin-bottom: 10px; }
+    .btn-add { background-color: #1e73be; color: #fff; padding: 6px 14px; font-size: 15px; border: none; border-radius: 3px; cursor: pointer; }
+    .btn-add:hover { background-color: #005bb5; }
+
+    .search-bar { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 10px; gap: 5px; }
+    .search-bar input { border: 2px solid #002b5b; padding: 6px; font-size: 15px; border-radius: 3px; }
+    .search-bar button { background-color: #002b5b; color: white; border: none; padding: 7px 12px; border-radius: 3px; cursor: pointer; font-size: 15px; }
+    .search-bar button:hover { background-color: #004080; }
+
+    table { width: 100%; border-collapse: collapse; border: 2px solid #002b5b; font-size: 16px; }
+    th, td { padding: 10px; border: 1px solid #002b5b; text-align: left; vertical-align: middle; }
+    th { background-color: #e8f1ff; font-weight: bold; }
+
+    /* Dropdown in table */
+    .dropdown { position: relative; display: inline-block; }
+    .dropdown-btn { background-color: #fff; color: #002b5b; border: 2px solid #1e73be; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; display: flex; align-items: center; gap: 5px; transition: all 0.2s ease; }
+    .dropdown-btn:hover { background-color: #e8f1ff; color: #002b5b; }
+    .dropdown-content { display: none; position: absolute; top: 100%; left: 0; background-color: #fff; border: 2px solid #002b5b; border-radius: 4px; width: 100px; z-index: 100; overflow: hidden; }
+    .dropdown-content a { display: flex; align-items: center; gap: 10px; padding: 8px 10px; text-decoration: none; color: #002b5b; font-size: 15px; font-weight: bold; border-bottom: 1px solid #002b5b; background-color: #f8fbff; }
+    .dropdown-content a:last-child { border-bottom: none; }
+    .dropdown-content a:hover { background-color: #e8f1ff; }
+    .dropdown.show .dropdown-content { display: block; }
+
+    /* Modal */
+    .modal { display: none; position: fixed; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 2000; }
+    .modal-content { background: white; border: 2px solid #002b5b; border-radius: 8px; padding: 20px; width: 350px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+    .modal-header { font-size: 18px; font-weight: bold; color: #002b5b; margin-bottom: 15px; }
+    .modal label { font-weight: bold; color: #002b5b; display: block; margin-top: 10px; }
+    .modal input, .modal textarea { width: 100%; padding: 8px; border: 2px solid #002b5b; border-radius: 4px; font-size: 15px; }
+    .modal textarea { resize: none; }
+    .modal-buttons { margin-top: 15px; display: flex; justify-content: space-between; }
+    .btn-cancel { background: none; color: #002b5b; border: 2px solid transparent; cursor: pointer; font-size: 15px;}
+    .btn-save { background-color: #1e73be; color: white; padding: 6px 14px; border-radius: 4px; cursor: pointer; font-size: 15px;}
+    .btn-save:hover { background-color: #005bb5; }
+
+    /* Success message */
+    .success-modal { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 3000; display: none; }
+    .success-modal-content { background-color: #e8f1ff; border: 2px solid #002b5b; border-radius: 50px; padding: 10px 30px; text-align: center; font-weight: bold; color: #002b5b; }
+
+    /* Shake animation */
+    @keyframes shake { 0% { transform: translateX(0); } 20% { transform: translateX(-5px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(5px); } 100% { transform: translateX(0); } }
+    .shake { animation: shake 0.4s ease; }
+</style>
+</head>
+<body>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header"><img src="LOGO.png"> ResearcHive</div>
+    <a href="DASHBOARD.HTML"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+    <div class="sidebar-section-gap"></div>
+    <a href="DEPT.html" class="active-link"><i class="fas fa-building"></i> Department List</a>
+    <a href="PROGRAM.html"><i class="fas fa-graduation-cap"></i> Program List</a>
+    <a href="MANUSCRIPT.html"><i class="fas fa-folder-open"></i> Research Profile</a>
+    <a href="STAT.html"><i class="fas fa-chart-bar"></i> Statistics</a>
+    <a href="SETTING.html"><i class="fas fa-cog"></i> Settings</a>
+</div>
+
+<div class="topbar">
+   <div class="logo">
+  <i class="fas fa-bars menu-toggle" id="menuToggle"></i>
+  <a href="DASHBOARD.html" style="display:flex; align-items:center; text-decoration:none; color:inherit;">
+    <img src="LOGO.png" alt="Logo">
+    <span style="font-weight:bold; font-size:20px; margin-left:8px;">ResearcHive</span>
+  </a>
+</div>
+
+    <div class="user-profile" id="userProfileBtn">
+    <i class="fas fa-user-circle"></i>
+    <span id="userName">Admin</span>
+    <div class="profile-dropdown" id="profileDropdown">
+        <a href="LOGIN.HTML"><i class="fas fa-sign-out-alt"></i> Log Out</a>
+    </div>
+</div>
+
+</div>
+
+<div class="main" id="mainContent">
+    <div class="page-header">
+        Department List
+        <button class="btn-add" id="addDeptBtn">+ Add New Department</button>
+    </div>
+
+    <div class="search-bar">
+        <input type="text" placeholder="Search..." id="searchInput">
+        <button><i class="fas fa-search"></i></button>
+    </div>
+
+    <table id="deptTable">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Department Name</th>
+                <th>Description</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="deptTableBody"></tbody>
+    </table>
+</div>
+
+<!-- Department Modal -->
+<div class="modal" id="deptModal">
+    <div class="modal-content">
+        <div class="modal-header"><i class="fas fa-building"></i> Department Details</div>
+        <input type="hidden" id="deptId">
+        <label>Department Name</label>
+        <input type="text" id="deptName">
+        <label>Description</label>
+        <textarea id="deptDesc" rows="2"></textarea>
+        <div class="modal-buttons">
+            <button class="btn-cancel" id="cancelModal">Cancel</button>
+            <button class="btn-save" id="saveDept">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div id="successModal" class="success-modal">
+    <div class="success-modal-content"></div>
+</div>
+
+<script src="https://unpkg.com/@supabase/supabase-js"></script>
+<script>
+const SUPABASE_URL = "https://ckuhctjmvpxffyprmatx.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrdWhjdGptdnB4ZmZ5cHJtYXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3MDMzNDUsImV4cCI6MjA3MTI3OTM0NX0.n6YLr6jnZdj4HtIWao7iOh2kygEpfqph-eZW37k8BWg";
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const deptTableBody = document.getElementById("deptTableBody");
+const modal = document.getElementById("deptModal");
+const addBtn = document.getElementById("addDeptBtn");
+const cancelBtn = document.getElementById("cancelModal");
+const saveBtn = document.getElementById("saveDept");
+const successModal = document.getElementById("successModal");
+const userProfileBtn = document.getElementById("userProfileBtn");
+const profileDropdown = document.getElementById("profileDropdown");
+
+let editingId = null;
+
+// ===== Dynamic Admin Name and Role =====
+const storedProfile = localStorage.getItem("rh_profile");
+let userRole = null;
+
+if(storedProfile){
+    const profile = JSON.parse(storedProfile);
+    userRole = profile.role;
+    document.getElementById("userName").textContent = profile.full_name.replace("Coordinator","Admin");
+}
+
+// Hide Add button if not super_admin
+if(userRole !== "super_admin"){
+    addBtn.style.display = "none";
+}
+
+// Load Departments
+async function loadDepartments() {
+    try {
+        const { data, error } = await db.from("departments").select("*").order("created_at", { ascending: true });
+        if(error) throw error;
+
+        deptTableBody.innerHTML = "";
+
+        data.forEach((dept, i) => {
+            const row = document.createElement("tr");
+
+            // Always add the first two columns
+            let rowHTML = `
+                <td>${i+1}</td>
+                <td>${dept.department_name}</td>
+                <td>${dept.description || ""}</td>
+            `;
+
+            // Only add Action column for super_admin
+            if(userRole === "super_admin"){
+                rowHTML += `
+                <td>
+                    <div class="dropdown">
+                        <button class="dropdown-btn">Action <i class="fas fa-caret-down"></i></button>
+                        <div class="dropdown-content">
+                            <a href="#" onclick="editDept('${dept.id}','${dept.department_name}','${dept.description || ""}')"><i class="fas fa-edit"></i> Edit</a>
+                        </div>
+                    </div>
+                </td>
+                `;
+            }
+
+            row.innerHTML = rowHTML;
+            deptTableBody.appendChild(row);
+        });
+
+        // Remove Action header if user is not super_admin
+        const tableHead = document.querySelector("#deptTable thead tr");
+        if(userRole !== "super_admin") {
+            tableHead.children[3].remove(); // remove the Action column header
+        }
+
+    } catch(error) {
+        console.error("Error loading departments:", error);
+    }
+}
+
+
+// Add/Edit Department
+window.editDept = (id,name,desc)=>{
+    editingId = id;
+    document.getElementById("deptName").value = name;
+    document.getElementById("deptDesc").value = desc;
+    modal.style.display = "flex";
+}
+
+addBtn.addEventListener("click", ()=>{
+    if(userRole !== "super_admin") return;
+    editingId = null;
+    document.getElementById("deptName").value = "";
+    document.getElementById("deptDesc").value = "";
+    modal.style.display = "flex";
+});
+
+cancelBtn.addEventListener("click", ()=> modal.style.display = "none");
+
+saveBtn.addEventListener("click", async () => {
+    if (userRole !== "super_admin") {
+        alert("You do not have permission to add or edit departments.");
+        return;
+    }
+
+    const name = document.getElementById("deptName").value.trim();
+    const desc = document.getElementById("deptDesc").value.trim();
+    const modalContent = document.querySelector(".modal-content");
+
+    // Single showError helper that targets the existing modal content safely
+    function showError(message) {
+        if (modalContent) {
+            modalContent.classList.add("shake");
+        }
+        successModal.querySelector(".success-modal-content").textContent = message;
+        successModal.style.display = "block";
+        setTimeout(() => {
+            if (modalContent) modalContent.classList.remove("shake");
+            successModal.style.display = "none";
+        }, 1500);
+    }
+
+    // Validate
+    if (!name && !desc) { showError("Add Department Details!"); return; }
+    if (!name) { showError("Add Department Name!"); return; }
+    if (!desc) { showError("Add Department Description!"); return; }
+
+    try {
+        // Check duplicate name
+        let nameQuery = db.from("departments").select("id").eq("department_name", name);
+        if (editingId) nameQuery = nameQuery.neq("id", editingId);
+        const { data: existingName, error: nameError } = await nameQuery;
+        if (nameError) throw nameError;
+        if (existingName && existingName.length > 0) { showError("Department Name already exists!"); return; }
+
+        // Check duplicate description
+        let descQuery = db.from("departments").select("id").eq("description", desc);
+        if (editingId) descQuery = descQuery.neq("id", editingId);
+        const { data: existingDesc, error: descError } = await descQuery;
+        if (descError) throw descError;
+        if (existingDesc && existingDesc.length > 0) { showError("Department Description already exists!"); return; }
+
+        // Save or update
+        if (editingId) {
+            const { error } = await db.from("departments").update({ department_name: name, description: desc }).eq("id", editingId);
+            if (error) throw error;
+            showSuccess("updated");
+        } else {
+            const { error } = await db.from("departments").insert([{ department_name: name, description: desc }]);
+            if (error) throw error;
+            showSuccess("added");
+        }
+
+        modal.style.display = "none";
+        loadDepartments();
+        editingId = null;
+
+    } catch (error) {
+        console.error("Error saving department:", error);
+        showError("An error occurred while saving.");
+    }
+});
+
+
+// Show success
+function showSuccess(action){
+    successModal.querySelector(".success-modal-content").textContent = `Department successfully ${action}!`;
+    successModal.style.display = "block";
+    setTimeout(()=> successModal.style.display = "none",3000);
+}
+
+// Table dropdown
+document.addEventListener("click",(event)=>{
+    document.querySelectorAll(".dropdown").forEach(d=>d.classList.remove("show"));
+    if(event.target.closest(".dropdown-btn")){
+        const dropdown = event.target.closest(".dropdown");
+        dropdown.classList.toggle("show");
+        event.stopPropagation();
+    }
+});
+
+// Search
+document.getElementById("searchInput").addEventListener("keyup", function(){
+    const filter = this.value.toLowerCase();
+    document.querySelectorAll("#deptTableBody tr").forEach(row=>{
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(filter) ? "" : "none";
+    });
+});
+
+// Sidebar toggle
+document.getElementById("menuToggle").addEventListener("click", ()=>{
+    document.getElementById("sidebar").classList.toggle("active");
+    document.getElementById("mainContent").classList.toggle("active");
+});
+
+// User dropdown
+userProfileBtn.addEventListener("click",(event)=>{
+    profileDropdown.classList.toggle("show");
+    event.stopPropagation();
+});
+
+window.addEventListener("click",(event)=>{
+    if(!event.target.closest('.user-profile')){
+        profileDropdown.classList.remove("show");
+    }
+});
+
+// On load
+window.addEventListener("load", ()=>{
+    loadDepartments();
+});
+</script>
+</body>
+</html>

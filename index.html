@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="LOGO.png">
+  <title>ResearcHive </title>
+  <style>
+    /* (your original CSS; unchanged) */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { display: flex; height: 100vh; background: url('BG.jpg') center center no-repeat; background-size: cover; background-color: #f0f0f0; flex: 1; }
+    .overlay { width: 40%; display: flex; flex-direction: column; justify-content: center; padding: 100px; align-items: flex-start; margin-left: auto; }
+    .login-header { display:flex; align-items:center; gap:10px; margin-bottom:5px; }
+    .login-header img { width:40px; height:40px; }
+    .login-headIn this phase, the researchers implemented the planned design of the web and mobile applications and utilized the selected development tools, including Android Studio and Visual Studio, for the application’s development. The development of both the front end, which referred to the application’s interface, and the back end began in this phase. Coding the application’s functionalities and integrating the database were also carried out during this stage.er h2 { font-size:40px; color:#1f3c88; }
+    .subtitle { font-size:12.5px; color:#555; margin-top:1px; margin-bottom:28px; margin-left:45px; }
+    .input-group { margin-bottom:15px; margin-left:20px; position:relative; width:80%; }
+    .input-group i { position:absolute; top:50%; transform:translateY(-50%); color:#888; font-size:16px; cursor:pointer; }
+    .input-group .fa-envelope { left:12px; pointer-events:none; }
+    .input-group .fa-lock { left:12px; pointer-events:none; }
+    .input-group .toggle-password { right:12px; }
+    .input-group input { width:100%; padding:12px 38px 12px 38px; border:1px solid #ccc; border-radius:5px; font-size:14px; outline:none; transition:border-color .3s, box-shadow .3s; }
+    .input-group input:focus { border-color:#1f3c88; box-shadow:0 0 5px rgba(31,60,136,0.5); }
+    .button-container { width:80%; margin-left:20px; margin-right:5px; text-align:right; margin-top:10px; }
+    .login-link { display:inline-block; padding:12px 24px; background:#1f3c88; color:white; text-decoration:none; border-radius:5px; font-size:16px; font-weight:bold; transition:background .3s; text-align:center; border:none; cursor:pointer; }
+    .login-link:hover { background:#162d66; }
+    #error { color:#162d66; margin-top:10px; font-size:14px; margin-left: 20px; }
+  </style>
+
+  <!-- Font Awesome (keeps your icons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <!-- Supabase JS (UMD build) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+  <div class="overlay">
+    <div class="login-header">
+      <img src="LOGO.png" alt="Logo">
+      <h2>Admin Login</h2>
+    </div>
+
+    <p class="subtitle">Welcome back! Please log in to your account.</p>
+
+    <div class="input-group">
+      <input type="email" id="email" placeholder="Enter Email" autocomplete="username" />
+      <i class="fas fa-envelope"></i>
+    </div>
+    <div class="input-group">
+      <input type="password" id="password" placeholder="Enter Password" autocomplete="current-password" />
+      <i class="fas fa-lock"></i>
+      <i class="fas fa-eye toggle-password" onclick="togglePassword()"></i>
+    </div>
+
+    <div class="button-container">
+      <button id="loginBtn" class="login-link" onclick="loginUser()">LOG IN</button>
+    </div>
+
+    <p id="error"></p>
+  </div>
+
+  <script>
+   
+    const SUPABASE_URL = "https://ckuhctjmvpxffyprmatx.supabase.co"; 
+    const SUPABASE_ANON_KEY = "sb_publishable_XFIckb3Yy0b6cW9VumLWDA_YcT7tfRT";        
+   
+    if (!window.supabase) {
+      document.getElementById('error').textContent = 'Supabase library failed to load. Check your internet connection.';
+      throw new Error('Supabase library not loaded');
+    }
+
+   
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    
+    function togglePassword() {
+      const passwordInput = document.getElementById("password");
+      const icon = document.querySelector(".toggle-password");
+      if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+      } else {
+        passwordInput.type = "password";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
+      }
+    }
+
+    // show error helper
+    function showError(msg) {
+      const el = document.getElementById("error");
+      el.textContent = msg;
+    }
+
+    // main login function
+    async function loginUser(event) {
+      if (event) event.preventDefault();
+      showError("");
+      const loginBtn = document.getElementById("loginBtn");
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      if (!email || !password) {
+        showError("Please enter email and password.");
+        return;
+      }
+
+      // UI: disable while logging in
+      loginBtn.disabled = true;
+      const prevText = loginBtn.textContent;
+      loginBtn.textContent = "Logging in...";
+
+      try {
+        // sign in
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (error) {
+  showError("Invalid login credentials.");
+  return;
+}
+
+const user = data.user;  // <-- define user after successful login
+
+// fetch profile (role + department_id)
+const { data: profile, error: profileError } = await supabaseClient
+  .from("profiles")
+  .select("role, department_id, full_name")
+  .eq("id", user.id)  // <-- now user is defined
+  .single();
+
+        if (profileError) {
+          showError("Profile fetch failed: " + profileError.message);
+          return;
+        }
+        if (!profile) {
+          showError("No profile found for this user.");
+          return;
+        }
+
+        // OPTIONAL: resolve department_name (so front-end can use it directly)
+try {
+  if (profile && profile.department_id) {
+    // Try to fetch real department name from departments table
+    const { data: deptData, error: deptErr } = await supabaseClient
+      .from('departments')
+      .select('department_name')
+      .eq('id', profile.department_id)
+      .single();
+    if (!deptErr && deptData && deptData.department_name) {
+      profile.department_name = deptData.department_name;
+    } else {
+      // fallback: maybe department_id already contains a name string
+      profile.department_name = profile.department_id;
+    }
+  }
+} catch (e) {
+  console.warn("Could not resolve department_name:", e);
+  profile.department_name = profile.department_id;
+}
+
+        // store profile locally for dashboard to read (optional)
+        localStorage.setItem("rh_profile", JSON.stringify(profile));
+
+        // redirect by role
+        if (profile.role === "super_admin") {
+          // change to your real super admin page
+          window.location.href = "DASHBOARD.html";
+        } else if (profile.role === "admin") {
+          // change to your real admin page
+          window.location.href = `DASHBOARD.html?dept=${profile.department_id}`;
+        } else {
+          showError("Unauthorized role.");
+        }
+      } catch (err) {
+        console.error(err);
+        showError("Unexpected error. See console.");
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = prevText;
+      }
+    }
+
+    // allow Enter key to submit when focused on password or email
+    document.getElementById("password").addEventListener("keyup", function(e) {
+      if (e.key === "Enter") loginUser();
+    });
+    document.getElementById("email").addEventListener("keyup", function(e) {
+      if (e.key === "Enter") loginUser();
+    });
+  </script>
+</body>
+</html>

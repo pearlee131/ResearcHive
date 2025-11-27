@@ -1,0 +1,2258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ResearcHive</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="LOGO.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background-color: #f8fbff; overflow-x: hidden; font-size: 16px; }
+        :root { --primary-blue: #002b5b; --secondary-blue: #a5c0ff; --light-blue: #e8f1ff; --white: #ffffff; --dark-gray: #333333; }
+
+        .sidebar { position: fixed; top: 0; left: -230px; width: 230px; height: 100%; background-color: #d8e9ff; box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); z-index: 1000; transition: left 0.3s ease; }
+        .sidebar.active { left: 0; }
+        .sidebar-header { display: flex; align-items: center; padding: 10px; font-weight: bold; color: var(--primary-blue); font-size: 18px; }
+        .sidebar-header img { height: 35px; width: 35px; margin-right: 8px; }
+        .sidebar a { display: flex; align-items: center; padding: 12px 20px; text-decoration: none; color: var(--primary-blue); font-weight: bold; font-size: 15px; }
+        .sidebar a:hover, .sidebar a.active-link { background-color: var(--primary-blue); color: var(--white); }
+        .sidebar a i { margin-right: 10px; }
+        .sidebar-section-gap { margin: 5px 0; border-top: 2px solid var(--secondary-blue); }
+
+        .topbar { position: fixed; top: 0; left: 0; right: 0; height: 60px; background-color: var(--light-blue); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); z-index: 1001; }
+        .logo { display: flex; align-items: center; font-weight: bold; font-size: 20px; color: var(--primary-blue); }
+        .logo img { height: 30px; margin-right: 8px; }
+        .menu-toggle { font-size: 20px; color: var(--primary-blue); cursor: pointer; margin-right: 10px; }
+        .admin-profile { position: relative; display: flex; align-items: center; font-weight: bold; color: var(--primary-blue); cursor: pointer; }
+        .admin-profile-dropdown {position: absolute; top: calc(100% + 5px); right: 0;background-color: #fff;border: 1px solid #ccc;box-shadow: 0 2px 5px rgba(0,0,0,0.1);border-radius: 5px;min-width: 150px;z-index: 1002;display: none;        }
+        .admin-profile-dropdown a {color: #002b5b;padding: 10px 15px;text-decoration: none;display: block;font-weight: normal;}
+        .admin-profile-dropdown a:hover { background-color: #f0f6ff; }
+        .admin-profile-dropdown a i {margin-right: 10px; }
+        .main { margin-top: 80px; padding: 20px; transition: margin-left 0.3s ease; }
+        .main.active { margin-left: 230px; }
+
+        .page-header { display: flex; align-items: center; justify-content: space-between; border: 2px solid var(--primary-blue); padding: 10px; font-weight: bold; color: var(--primary-blue); font-size: 18px; margin-bottom: 10px; }
+        .btn-add { background-color: #1e73be; color: var(--white); padding: 6px 14px; font-size: 15px; border: none; border-radius: 3px; cursor: pointer; }
+        .btn-add:hover { background-color: #005bb5; }
+
+        .search-bar { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 10px; gap: 5px; }
+        .search-bar input { border: 2px solid var(--primary-blue); padding: 6px; font-size: 15px; border-radius: 3px; }
+        .search-bar button { background-color: var(--primary-blue); color: white; border: none; padding: 7px 12px; border-radius: 3px; cursor: pointer; font-size: 15px; }
+        .search-bar button:hover { background-color: #004080; }
+
+        table { width: 100%; border-collapse: collapse; border: 2px solid var(--primary-blue); font-size: 16px; table-layout: fixed; }
+        th, td { padding: 10px; border: 1px solid var(--primary-blue); vertical-align: top; word-wrap: break-word; text-align: left; }
+        th { background-color: var(--light-blue); font-weight: bold; text-align:center; white-space: nowrap; }
+        th:first-child, td:first-child { width: 50px; }
+        th:nth-child(2), td:nth-child(2) { width: 9%; }
+        th:nth-child(3), td:nth-child(3) { width: 11%; }
+        th:nth-child(4), td:nth-child(4) { width: 85px; }
+        th:nth-child(5), td:nth-child(5) { width: 110px; }
+        th:nth-child(6), td:nth-child(6) { width: 85px; }
+        th:nth-child(7), td:nth-child(7) { width: 10%; }
+        th:nth-child(8), td:nth-child(8) { width: 11%; }
+        th:nth-child(9), td:nth-child(9) { width: 100px; }
+        th:nth-child(10), td:nth-child(10) { width: 100px; }
+        /* Make Full Document and Supporting Documents wrap like Excel */
+/* Clean wrapping for Full Document & Supporting Docs columns */
+/* One file = one line (no word splitting) */
+/* One file = one line (no word splitting) */
+td:nth-child(9) a,
+td:nth-child(10) a {
+  display: block;            
+  white-space: nowrap;       
+  overflow: hidden;          
+  text-overflow: ellipsis;   
+  max-width: 180px;          
+  color: #1e73be;            /* your original blue tone */
+  text-decoration: none;     
+  margin-bottom: 4px;
+  transition: color 0.2s ease;
+}
+
+/* Hover effect: bring back underline + darker blue */
+td:nth-child(9) a:hover,
+td:nth-child(10) a:hover {
+  text-decoration: underline;
+  color: #004080;            /* darker shade on hover */
+}
+
+
+
+
+        /* Fix for action column layout issues on smaller screens */
+th:last-child, td:last-child {
+  width: 130px !important;
+  text-align: center;
+  position: relative;
+}
+
+/* Ensure dropdown stays inside the table boundaries */
+.action-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.action-dropdown .dropdown-content {
+  right: 0;
+  left: auto;
+  min-width: 120px;
+  z-index: 999;
+  white-space: nowrap;
+}
+
+.action-dropdown.show .dropdown-content {
+  display: block;
+}
+
+        .abstract-truncated { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; }
+        .project-image { width: 100%; height: auto; max-height: 100px; object-fit: cover; display: block; }
+
+        .dropdown { position: relative; display: inline-block; }
+        .dropdown-btn { background-color: #f8fbff; color: var(--primary-blue); border: 2px solid var(--secondary-blue); padding: 6px 14px; border-radius: 10px; cursor: pointer; font-size: 16px; display: flex; align-items: center; gap: 5px; font-weight: bold; }
+        .dropdown-btn:hover { background-color: #eef6ff; }
+        .dropdown-content { display: none; position: absolute; left: 0; top: 100%; min-width: 50px; z-index: 100; }
+        .action-dropdown .dropdown-content { background-color: #e8f6ff; border: 2px solid var(--primary-blue); width: 100px; }
+        .action-dropdown .dropdown-content a { display: flex; align-items: center; padding: 8px; text-decoration: none; color: var(--primary-blue); font-weight: bold; font-size: 14px; border-bottom: 1px solid var(--primary-blue); }
+        .action-dropdown .dropdown-content a:last-child { border-bottom: none; }
+        .action-dropdown .dropdown-content a i { margin-right: 8px; font-size: 16px; }
+        .action-dropdown .dropdown-content a:hover { background-color: #d0eaff; }
+        .action-dropdown.show .dropdown-content { display: block; }
+
+        .popup-form { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); justify-content: center; align-items: center; z-index: 2000; }
+        @keyframes shake { 0% { transform: translateX(0); } 20% { transform: translateX(-10px); } 40% { transform: translateX(10px); } 60% { transform: translateX(-10px); } 80% { transform: translateX(10px); } 100% { transform: translateX(0); } }
+        .shake { animation: shake 0.4s; }
+        .success-message { position: fixed; top: 10%; left: 50%; transform: translate(-50%, -50%); background-color: var(--white); color: var(--primary-blue); border: 2px solid var(--primary-blue); padding: 12px 24px; border-radius: 30px; font-size: 18px; display: none; align-items: center; gap: 10px; font-weight: bold; z-index: 3000; animation: none; }
+        @keyframes fadeInOut { 0% { opacity: 0; transform: translateY(-10px); } 10%, 90% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-10px); } }
+
+        .popup-form .form-content { width: 600px; max-height: 80%; background: var(--white); padding: 20px; border-radius: 10px; border: 2px solid var(--primary-blue); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; }
+        .form-header h2 { font-size: 18px; font-weight: bold; color: var(--primary-blue); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .form-header i { color: var(--primary-blue); }
+        .form-body { overflow-y: auto; padding-right: 10px; }
+        .form-body label { font-weight: bold; font-size: 16px; color: var(--primary-blue); display: block; margin-top: 10px; }
+        .form-body input,
+        .form-body select,
+        .form-body textarea { width: 100%; padding: 8px; margin-top: 4px; margin-bottom: 10px; border: 2px solid var(--primary-blue); border-radius: 5px; font-size: 16px; }
+        .author-name-group { display: flex; flex-wrap: wrap; gap: 10px; }
+        .author-name-group input { flex: 1; min-width: 100px; }
+        .button-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+
+    
+    background: #fff;   /* White background bar */
+    
+    position: sticky;
+    bottom: 0;
+    z-index: 100;       /* Keep above text */
+}
+
+        .cancel-btn { background: none; border: none; color: var(--primary-blue); font-weight: bold; font-size: 16px; cursor: pointer; transition: font-size 0.2s ease; }
+        .cancel-btn:hover { font-size: 18px; }
+        .add-btn, .save-btn { color: white; padding: 8px 16px; font-size: 14px; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; background-color: #1e73be; }
+        .add-btn:hover, .save-btn:hover { background-color: #005bb5; }
+
+        .view-modal-content { width: 500px; max-height: 90%;background: var(--white);padding: 20px;border-radius: 10px;border: 2px solid var(--primary-blue);box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);display: flex; flex-direction: column;align-items: center; text-align: center;overflow-y: auto; }
+       .view-modal-content .back-button {
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  font-size: 24px;
+  color: var(--primary-blue);
+  cursor: pointer;
+  background: #fff; /* keep it visible on scroll */
+  padding: 5px;
+  z-index: 10;      /* make sure it stays above content */
+}
+
+       .view-modal-content .project-image {
+    width: 50%;
+    height: auto;
+    object-fit: fill;         
+    border-radius: 10px;
+    border: 2px solid var(--secondary-blue);
+    margin-bottom: 20px;
+    display: block;
+}
+
+        .view-modal-content h2, .view-modal-content h3 { color: var(--primary-blue);margin-bottom: 5px;font-weight: bold; }
+        .view-modal-content h2 {font-size: 22px; }
+        .view-modal-content .details-container { width: 100%; text-align: left;margin-top: 15px;}
+        .view-modal-content .detail-item {margin-bottom: 10px;padding: 8px;background-color: var(--light-blue);border: 1px solid var(--secondary-blue);border-radius: 5px;}
+        .view-modal-content .detail-item strong {display: block;color: var(--primary-blue);font-size: 14px; margin-bottom: 3px; }
+        .view-modal-content .full-document-link {display: flex; align-items: center; gap: 8px;color: #1e73be; font-weight: bold;text-decoration: none;margin-top: 15px;justify-content: center;  }
+        .view-modal-content .full-document-link:hover {text-decoration: underline; }
+        #viewSupportingDocs, 
+#viewDocumentLink {
+  text-align: left !important;   /* align links left */
+  align-self: flex-start;        /* stick to the left edge */
+  margin-left: 10px;             /* small padding if needed */
+}
+
+        .admin-profile { position: relative; display: flex; align-items: center; font-weight: bold; color: #002b5b; cursor: pointer; }
+        .admin-profile-dropdown {position: absolute;top: calc(100% + 5px);right: 0; background-color: #fff; border: 1px solid #ccc;box-shadow: 0 2px 5px rgba(0,0,0,0.1);border-radius: 5px; min-width: 150px;z-index: 1002;display: none;}
+        .admin-profile-dropdown a {color: #002b5b; padding: 10px 15px;text-decoration: none; display: block;font-weight: normal;}
+        .admin-profile-dropdown a:hover { background-color: #f0f6ff; }
+        .admin-profile-dropdown a i { margin-right: 10px; }
+        .main { margin-top: 80px; padding: 20px; transition: margin-left 0.3s ease; }
+        .main.active { margin-left: 230px; }
+
+      form {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.author-name-group,
+.adviser-name-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+
+
+        .status-container { margin-bottom: 10px; }
+        .status-container label { display: block; font-weight: bold; font-size: 16px; color: var(--primary-blue); margin-bottom: 5px; }
+        .radio-group { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; }
+        .radio-group input[type="radio"] { display: none; }
+        .checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+}
+
+.checkbox-group input[type="checkbox"] {
+    display: none; 
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    padding-left: 25px;
+    margin: 0;
+    font-weight: normal;
+}
+
+
+.checkbox-group label::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--primary-blue);
+    background-color: var(--white);
+    border-radius: 50%; 
+}
+
+
+.checkbox-group input[type="checkbox"]:checked + label::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    background-color: var(--primary-blue);
+    border-radius: 50%;
+}
+
+.supporting-label {
+  color: #1e73be;
+  font-weight: bold;
+}
+
+
+        @media (max-width: 768px) {table {font-size: 12px;} th, td { padding: 5px;} }
+       
+.view-modal-content {
+  padding-top: 0 !important;   /* remove the space above */
+}
+
+.view-modal-header {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+ 
+  z-index: 50;
+  min-height: 50px;
+}
+
+.view-modal-content .back-button {
+  font-size: 24px;
+  color: var(--primary-blue);
+  cursor: pointer;
+}
+
+
+    </style>
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="LOGO.png" alt="Logo"> ResearchHive
+        </div>
+        <a href="DASHBOARD.HTML"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <div class="sidebar-section-gap"></div>
+        <a href="DEPT.html"><i class="fas fa-building"></i> Department List</a>
+        <a href="PROGRAM.html"><i class="fas fa-graduation-cap"></i> Program List</a>
+        <a href="MANUSCRIPT.html" class="active-link"><i class="fas fa-folder-open"></i> Research Profile</a>
+        <a href="STAT.html"><i class="fas fa-chart-bar"></i> Statistics</a>
+        <a href="SETTING.html"><i class="fas fa-cog"></i> Settings</a>
+    </div>
+    <div class="topbar">
+        <div class="logo">
+  <i class="fas fa-bars menu-toggle" id="menuToggle"></i>
+  <a href="DASHBOARD.html" style="display:flex; align-items:center; text-decoration:none; color:inherit;">
+    <img src="LOGO.png" alt="Logo">
+    <span style="font-weight:bold; font-size:20px; margin-left:8px;">ResearcHive</span>
+  </a>
+</div>
+
+       <div class="admin-profile" id="adminProfileBtn">
+    <i class="fas fa-user-circle"></i>&nbsp; <span id="adminName">Admin</span>
+    <div class="admin-profile-dropdown" id="adminDropdown">
+        <a href="LOGIN.HTML"><i class="fas fa-sign-out-alt"></i> Log Out</a>
+    </div>
+</div>
+    </div>
+    <div id="successMessage" class="success-message">
+        <i class="fas fa-check-circle"></i> Research study successfully added to the list!
+    </div>
+    <div class="main" id="mainContent">
+        <div class="page-header">
+            Research Profiles
+            <button class="btn-add" id="openAddStudy">+ Add New Study</button>
+        </div>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search...">
+            <button id="searchButton"><i class="fas fa-search"></i></button>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Title</th>
+                    <th>Authors</th>
+                    <th>Year<br>Authored</th>
+                    <th>Department</th>
+                    <th>Program</th>
+                    <th>Abstract</th>
+                    <th>Adviser</th>
+                    <th>Full<br> Document</th>
+                    <th>Supporting<br>Documents</th>
+                    <th>Study<br>Image</th>
+                    <th>Status</th> <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="researchTableBody"></tbody>
+        </table>
+    </div>
+
+    <div class="popup-form" id="addStudyForm">
+        <div class="form-content">
+            <div class="form-header">
+                <h2><i class="fas fa-folder-open"></i> Research Study Details</h2>
+            </div>
+            <div class="form-body">
+                <div id="step1">
+                    <label for="title">Research Title:</label>
+                    <input type="text" id="title" placeholder="Enter Research Title">
+
+                    <label for="authors">No. of Author/s:</label>
+                    <input type="number" id="authors" placeholder="Enter number of authors" value="1" min="1">
+
+                    <div id="authorFieldsContainer"></div>
+
+                    <label for="year">Year Authored:</label>
+                    <input type="number" id="year" placeholder="Enter Year" min="1900" max="2099">
+
+                    <div class="button-group" id="step1-buttons">
+                        <button type="button" class="cancel-btn" id="cancelAddStudy">Cancel</button>
+                        <button type="button" class="add-btn" id="nextToStep2">Next</button>
+                    </div>
+                </div>
+
+                <div id="step2" style="display:none;">
+                   
+<label for="department">Department:</label>
+<select id="department">
+ 
+</select>
+<label for="program">Program:</label>
+<select id="program">
+ 
+</select>
+
+<label for="major" id="majorLabel" style="display:none;">Major:</label>
+<select id="major" style="display:none;">
+  
+</select>
+
+<label for="adviser">Adviser:</label>
+<div class="adviser-name-group">
+    <input type="text" id="adviserFirst" name="adviserFirst" placeholder="First Name" required>
+    <input type="text" id="adviserMiddle" name="adviserMiddle" placeholder="Middle Initial" maxlength="1">
+    <input type="text" id="adviserLast" name="adviserLast" placeholder="Last Name" required>
+    <input type="text" id="adviserSuffix" name="adviserSuffix" placeholder="Suffix ">
+</div>
+
+
+
+
+                    <label for="abstract">Abstract:</label>
+                    <textarea id="abstract" rows="3" placeholder="Enter Abstract"></textarea>
+                    
+                    <div class="status-container">
+    <label>This study...</label>
+    <div class="checkbox-group">
+        <input type="checkbox" id="status-protected" name="status" value="Protected">
+        <label for="status-protected">Protected</label>
+        <input type="checkbox" id="status-published" name="status" value="Published">
+        <label for="status-published">Published</label>
+        <input type="checkbox" id="status-presented" name="status" value="Presented">
+        <label for="status-presented">Presented</label>
+        <input type="checkbox" id="status-extended" name="status" value="Extended">
+        <label for="status-extended">Extended</label>
+    </div>
+</div>
+
+                    
+           <label for="document" style="margin-top: 20px;">Full Document:</label>
+<div style="display: flex; align-items: center; gap: 10px;">
+  <input type="file" id="document" name="document" accept=".pdf">
+  <button type="button" id="clearDocumentBtn" title="Clear file"
+          style="background: none; border: none; cursor: pointer; color: #002b5b;">
+    <i class="fas fa-times-circle" style="font-size: 20px;"></i>
+  </button>
+</div>
+
+
+
+<label for="supportingDocs">Supporting Documents:</label>
+<div style="display:flex; align-items:center; gap:10px;">
+  <input type="file" id="supportingDocs" name="supportingDocs" accept=".pdf,.doc,.docx,.jpg,.png" multiple>
+  <button type="button" id="clearSupportingBtn" title="Clear supporting files"
+          style="background: none; border: none; cursor: pointer; color: #002b5b;">
+    <i class="fas fa-times-circle" style="font-size: 20px;"></i>
+  </button>
+</div>
+
+
+<label for="projectImage">Study Image:</label>
+<div style="display:flex; align-items:center; gap:10px;">
+  <input type="file" id="projectImage" name="projectImage" accept=".png,.jpg,.jpeg">
+  <button type="button" id="clearImageBtn" title="Clear image"
+          style="background: none; border: none; cursor: pointer; color: #002b5b;">
+    <i class="fas fa-times-circle" style="font-size: 20px;"></i>
+  </button>
+</div>
+
+
+
+                    <div class="button-group" id="step2-buttons">
+                        <button type="button" class="cancel-btn" id="backToStep1">Back</button>
+                        <button type="button" class="add-btn" id="submitBtn">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="popup-form" id="viewStudyModal" style="display: none;">
+        <div class="view-modal-content">
+            <div class="view-modal-header">
+  <i class="fas fa-arrow-left back-button" id="closeViewModal"></i>
+</div>
+
+<img src="" alt="Project Image" class="project-image" id="viewImage">
+
+            <h2 id="viewTitle">Project Title</h2>
+            <h3 id="viewAuthors">Authors, Year Authored</h3>
+            <div class="details-container">
+                <div class="detail-item">
+                    <strong>Department, Program</strong>
+                    <span id="viewDeptProgram"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Abstract</strong>
+                    <span id="viewAbstract"></span>
+                </div>
+                <div class="detail-item">
+  <strong>Adviser</strong>
+  <span id="viewAdviser"></span>
+</div>
+
+                <div class="detail-item" id="statusContainer">
+                    <strong>Status</strong>
+                    <span id="viewStatus"></span>
+                </div>
+            </div>
+            <a href="#" class="full-document-link" id="viewDocumentLink" target="_blank">
+    Study Full Document <i class="fas fa-download"></i> </a>
+    <div class="view-section" id="viewSupportingDocs">
+    <strong>Supporting Documents:</strong>
+</div>
+</div>
+</div>
+
+
+    </div>
+
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://ckuhctjmvpxffyprmatx.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_XFIckb3Yy0b6cW9VumLWDA_YcT7tfRT';
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const BUCKET_DOCS = 'manuscript-docs';
+const BUCKET_IMAGES = 'manuscript-images';
+
+
+let currentUser = null;
+let currentProfile = null;    // { role, department_id, full_name, ... }
+let currentDeptName = null;   // department_name (string) used in manuscripts.department
+
+async function loadCurrentUserProfile() {
+  try {
+    const { data: { user }, error: userErr } = await supabaseClient.auth.getUser();
+    if (userErr || !user) {
+      console.warn('No user logged in or getUser error', userErr);
+      return;
+    }
+    currentUser = user;
+
+    const { data: profile, error: profileErr } = await supabaseClient
+      .from('profiles')
+      .select('role, department_id, full_name')
+      .eq('id', user.id)
+      .single();
+
+    if (profileErr) {
+      console.warn('No profile row or error', profileErr);
+      currentProfile = null;
+      return;
+    }
+    currentProfile = profile;
+
+    // If profiles.department_id is a UUID, fetch the department_name text used in manuscripts
+    if (currentProfile.department_id) {
+      const { data: dept, error: deptErr } = await supabaseClient
+        .from('departments')
+        .select('department_name')
+        .eq('id', currentProfile.department_id)
+        .single();
+      if (!dept || deptErr) {
+        console.warn('Could not fetch department name', deptErr);
+      } else {
+        currentDeptName = dept.department_name;
+      }
+    }
+  } catch (err) {
+    console.error('loadCurrentUserProfile', err);
+  }
+}
+
+
+
+const sidebar = document.getElementById('sidebar');
+const mainContent = document.getElementById('mainContent');
+const menuToggle = document.getElementById('menuToggle');
+const addStudyForm = document.getElementById('addStudyForm');
+const researchTableBody = document.getElementById('researchTableBody');
+const successMessage = document.getElementById('successMessage');
+const titleInput = document.getElementById('title');
+const authorsInput = document.getElementById('authors');
+const authorFieldsContainer = document.getElementById('authorFieldsContainer');
+const yearInput = document.getElementById('year');
+const departmentSelect = document.getElementById('department');
+const programSelect = document.getElementById('program');
+const abstractTextarea = document.getElementById('abstract');
+const majorSelect = document.getElementById('major');
+const majorLabel  = document.getElementById('majorLabel');
+const submitBtn = document.getElementById('submitBtn');
+const searchInput = document.getElementById('searchInput');
+const adminProfileBtn = document.getElementById("adminProfileBtn");
+const adminDropdown = document.getElementById("adminDropdown");
+// file input elements + clear buttons
+const clearDocumentBtn = document.getElementById('clearDocumentBtn');
+const documentInput = document.getElementById('document');
+const clearImageBtn = document.getElementById('clearImageBtn');
+const projectImageInput = document.getElementById('projectImage');
+const clearSupportingBtn = document.getElementById('clearSupportingBtn');
+const supportingDocsInput = document.getElementById('supportingDocs');
+
+// --- CLEAR: Full Document ---
+if (clearDocumentBtn && documentInput) {
+  clearDocumentBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    documentInput.value = '';
+    documentCleared = true;
+    if (rowToEdit) {
+      const docCell = rowToEdit.querySelectorAll('td')[8]; // document column (0-based)
+      if (docCell) docCell.innerHTML = '';
+    }
+    showSuccessMessage('Full document cleared.', { duration: 1500 });
+  });
+
+  // --- CLEAR: Supporting Documents ---
+const clearSupportingBtn = document.getElementById('clearSupportingBtn');
+const supportingDocsInput = document.getElementById('supportingDocs');
+
+if (clearSupportingBtn && supportingDocsInput) {
+  clearSupportingBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    supportingDocsInput.value = '';
+    supportingCleared = true;
+
+    // Immediately clear links from table row
+    if (rowToEdit) {
+      const supCell = rowToEdit.querySelectorAll('td')[9]; // supporting docs column index
+      if (supCell) {
+        supCell.innerHTML = '<span style="color:#888;">No supporting files</span>';
+      }
+    }
+
+    showSuccessMessage('Supporting documents cleared.', { duration: 1500 });
+  });
+}
+
+}
+
+// --- CLEAR: Study Image ---
+// --- CLEAR: Study Image ---
+if (clearImageBtn && projectImageInput) {
+  clearImageBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    projectImageInput.value = '';
+    imageCleared = true;
+
+    // your Supabase default image link
+    const defaultImageURL = "https://ckuhctjmvpxffyprmatx.supabase.co/storage/v1/object/public/manuscript-images/default.png";
+
+    // If editing a row, show the default image again instead of blank
+    if (rowToEdit) {
+      const imgCell = rowToEdit.querySelectorAll('td')[10]; // image column index
+      if (imgCell) {
+        imgCell.innerHTML = `<img src="${defaultImageURL}" alt="Project Image" style="width: 136px; height: 107px; object-fit: cover; border-radius: 8px;">`;
+      }
+    }
+
+    showSuccessMessage('Study image reset to default.', { duration: 1500 });
+  });
+}
+
+
+
+
+
+// --- FIX START: Sidebar and Dropdown Functionality ---
+
+const adminNameSpan = document.getElementById("adminName");
+
+// 1. Sidebar Toggle Function
+menuToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('active');
+    mainContent.classList.toggle('active'); // or 'shifted', based on your CSS
+});
+
+// 2. Admin Profile Dropdown Toggle
+adminProfileBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); // Prevent click from bubbling up
+    adminDropdown.style.display = adminDropdown.style.display === 'block' ? 'none' : 'block';
+});
+
+// 3. Close Dropdown when clicking outside
+document.addEventListener('click', (e) => {
+    // Check if the dropdown is open AND the click target is NOT the profile button
+    if (adminDropdown.style.display === 'block' && !adminProfileBtn.contains(e.target)) {
+        adminDropdown.style.display = 'none';
+    }
+});
+
+// 4. Dynamic Admin Name (using dashboard's localStorage method for quick UI load)
+const storedProfile = localStorage.getItem("rh_profile");
+if (storedProfile) {
+    try {
+        const profile = JSON.parse(storedProfile);
+        let displayName = profile.full_name;
+        
+        if (displayName) {
+          // Clean up the name for display consistency
+          displayName = displayName.replace("Coordinator", "Admin").replace("Head", "Admin");
+        }
+        adminNameSpan.textContent = displayName || "Admin"; 
+    } catch (e) {
+        console.error("Error parsing profile from local storage:", e);
+    }
+}
+
+// --- FIX END ---
+// 1. Sidebar Toggle Function
+menuToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('active');
+    mainContent.classList.toggle('active');
+});
+
+// 2. Admin Profile Dropdown Toggle
+adminProfileBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); // Stop click from bubbling to document listener
+    adminDropdown.style.display = adminDropdown.style.display === 'block' ? 'none' : 'block';
+});
+
+// 3. Close Dropdown when clicking outside
+document.addEventListener('click', (e) => {
+    // Only close if the dropdown is open AND the click target is not inside the admin profile button area
+    if (adminDropdown.style.display === 'block' && !adminProfileBtn.contains(e.target)) {
+        adminDropdown.style.display = 'none';
+    }
+});
+
+
+// ------------------------------------
+
+const step1 = document.getElementById('step1');
+const step2 = document.getElementById('step2');
+const nextToStep2Btn = document.getElementById('nextToStep2');
+const backToStep1Btn = document.getElementById('backToStep1');
+const cancelAddStudyBtn = document.getElementById('cancelAddStudy');
+
+nextToStep2Btn.addEventListener('click', (e) => {
+  e.preventDefault();
+
+  const title = titleInput.value.trim();
+  const yearVal = String(yearInput.value || '').trim();
+  const authorGroups = authorFieldsContainer.querySelectorAll('.author-name-group');
+
+  // 1. All empty
+  if (!title && !yearVal && authorGroups.length === 0) {
+    shakeForm(); showPopup('Add Research Study details!'); return;
+  }
+
+  // 2. Title
+  if (!title) { shakeForm(); showPopup('Add Research Study Title!'); return; }
+
+  // 3. Authors
+  if (authorGroups.length === 0) {
+    shakeForm(); showPopup('Add Study Author/s!'); return;
+  }
+  const main = authorGroups[0];
+  const mainFirst = (main.querySelector('.author-first') || { value: '' }).value.trim();
+  const mainLast = (main.querySelector('.author-last') || { value: '' }).value.trim();
+
+  if (mainFirst && !mainLast) { shakeForm(); showPopup("Add Author's Last Name!"); return; }
+  if (!mainFirst && mainLast) { shakeForm(); showPopup("Add Author's First Name!"); return; }
+  if (!mainFirst && !mainLast) { shakeForm(); showPopup('Add Study Author/s!'); return; }
+
+  // 4. Year
+  if (!yearVal) { shakeForm(); showPopup('Add Study Year Authored!'); return; }
+  if (!/^\d{4}$/.test(yearVal)) { shakeForm(); showPopup('Invalid Year entered!'); return; }
+  if (parseInt(yearVal) < 2000) { shakeForm(); showPopup('Year must be 2000 or later!'); return; }
+
+  // ✅ Passed → go to Step 2
+  step1.style.display = 'none';
+  step2.style.display = 'block';
+  document.getElementById('step1-buttons').style.display = 'none';
+  document.getElementById('step2-buttons').style.display = 'flex';
+
+  submitBtn.innerText = 'Add';
+  submitBtn.classList.remove('save-btn');
+  submitBtn.classList.add('add-btn');
+});
+
+
+let nextId = 1;
+let rowToEdit = null;
+let currentEditingId = null;
+let editingExistingSupporting = []; 
+
+let documentCleared = false;
+let imageCleared = false;
+let supportingCleared = false;
+
+
+
+programSelect.addEventListener('change', handleProgramChange);
+
+function handleProgramChange() {
+  const opt = programSelect.options[programSelect.selectedIndex];
+  const majorsStr = (opt && opt.dataset.majors) ? opt.dataset.majors.trim() : '';
+
+  
+  majorSelect.innerHTML = '';
+
+  if (majorsStr) {
+    const majors = majorsStr.split(',').map(m => m.trim()).filter(Boolean);
+    majors.forEach(m => {
+      const o = document.createElement('option');
+      o.value = m;
+      o.textContent = m;
+      majorSelect.appendChild(o);
+    });
+    majorLabel.style.display  = 'block';
+    majorSelect.style.display = 'block';
+  } else {
+    majorLabel.style.display  = 'none';
+    majorSelect.style.display = 'none';
+  }
+}
+
+// --- Cancel button when adding a NEW study (Step 1 Cancel) ---
+const cancelAddBtn = document.getElementById('cancelAddStudy');
+if (cancelAddBtn) {
+  cancelAddBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    addStudyForm.style.display = 'none';
+    resetFormAndState(); // uses your existing reset helper
+  });
+}
+
+
+async function populateProgramsForDepartment(departmentName) {
+  
+  programSelect.innerHTML = '';
+
+  if (!departmentName) {
+    
+    majorSelect.innerHTML = '';
+    majorSelect.style.display = 'none';
+    majorLabel.style.display  = 'none';
+    return;
+  }
+
+  const { data: programs, error: progError } = await supabaseClient
+    .from('programs')
+    .select('program_name, majors')
+    .eq('department', departmentName)
+    .order('program_name', { ascending: true });
+
+  if (progError) {
+    console.error('Error loading programs for department', departmentName, progError);
+    programSelect.innerHTML = '';
+    return;
+  }
+
+  
+  (programs || []).forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = String(p.program_name).trim();
+    opt.textContent = String(p.program_name).trim();
+    opt.dataset.majors = p.majors ? String(p.majors).trim() : '';
+    programSelect.appendChild(opt);
+  });
+
+  
+  if (programSelect.options.length > 0) {
+    programSelect.selectedIndex = 0;
+    handleProgramChange();
+  } else {
+    
+    majorSelect.innerHTML = '';
+    majorLabel.style.display = 'none';
+    majorSelect.style.display = 'none';
+  }
+}
+
+
+
+function createAuthorFields(numAuthors, authorData = []) {
+    authorFieldsContainer.innerHTML = '';
+    if (numAuthors < 1) return;
+
+    for (let i = 0; i < numAuthors; i++) {
+        const authorInfo = authorData[i] || { first: '', middle: '', last: '', suffix: '' };
+        const labelText = i === 0 ? 'Main Author:' : `Co-Author #${i}:`;
+
+        const label = document.createElement('label');
+        label.innerText = labelText;
+        label.style.marginTop = i > 0 ? '10px' : '0';
+        authorFieldsContainer.appendChild(label);
+
+        const div = document.createElement('div');
+        div.classList.add('author-name-group');
+        div.innerHTML = `
+            <input type="text" class="author-first" placeholder="First Name" value="${escapeAttr(authorInfo.first)}" required>
+            <input type="text" class="author-middle" placeholder="Middle Initial" value="${escapeAttr(authorInfo.middle)}">
+            <input type="text" class="author-last" placeholder="Last Name" value="${escapeAttr(authorInfo.last)}" required>
+            <input type="text" class="author-suffix" placeholder="Suffix" value="${escapeAttr(authorInfo.suffix)}">
+        `;
+        authorFieldsContainer.appendChild(div);
+    }
+}
+
+
+document.addEventListener('input', (e) => {
+  if (e.target.classList.contains('author-middle')) {
+    let val = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
+    if (val.length > 1) val = val.charAt(0);
+    e.target.value = val;
+  }
+});
+
+
+function escapeHTML(str) {
+    return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+}
+function escapeAttr(str) {
+    return escapeHTML(str).replace(/"/g, '&quot;');
+}
+
+function getAuthorsStringFromInputs() {
+    const authorFields = authorFieldsContainer.querySelectorAll('.author-name-group');
+    const authorNames = Array.from(authorFields).map(group => {
+        const first = group.querySelector('.author-first').value.trim();
+        const middle = group.querySelector('.author-middle').value.trim();
+        const last = group.querySelector('.author-last').value.trim();
+        const suffix = group.querySelector('.author-suffix').value.trim();
+        
+        const nameParts = [last];
+        if (first) nameParts.push(first);
+        if (middle) nameParts.push(middle + '.');
+        if (suffix) nameParts.push(suffix);
+        
+        return nameParts.join(' ');
+    }).filter(author => author.length > 0);
+    return authorNames.join(', ');
+}
+
+function validateFiles() {
+  const supporting = document.getElementById('supportingDocs');
+  if (!supporting) return true;
+  const files = supporting.files;
+  if (files && files.length > 5) {
+    shakeForm();
+    showPopup('Maximum 5 supporting files allowed!');
+    return false;
+  }
+  return true;
+}
+
+// Validate the year input (same constraints used earlier)
+function validateYear() {
+  const yearVal = String(yearInput.value || '').trim();
+  if (!/^\d{4}$/.test(yearVal)) {
+    shakeForm();
+    showPopup('Invalid Year entered!');
+    return false;
+  }
+  if (parseInt(yearVal, 10) < 2000) {
+    shakeForm();
+    showPopup('Year must be 2000 or later!');
+    return false;
+  }
+  return true;
+}
+
+function validateUniqueAuthors() {
+  const authorGroups = authorFieldsContainer.querySelectorAll('.author-name-group');
+  const seen = new Set();
+
+  for (let group of authorGroups) {
+    const first = group.querySelector('.author-first').value.trim().toLowerCase();
+    const middle = group.querySelector('.author-middle').value.trim().toLowerCase();
+    const last = group.querySelector('.author-last').value.trim().toLowerCase();
+
+    if (!first || !last) continue; 
+
+    const key = `${first}|${middle}|${last}`;
+    if (seen.has(key)) {
+      shakeForm();
+      return false; 
+    }
+    seen.add(key);
+  }
+  return true; 
+}
+
+
+function getStatusStringFromInput() {
+    const checkedStatuses = Array.from(document.querySelectorAll('input[name="status"]:checked'))
+        .map(cb => cb.value);
+    return checkedStatuses.join(', ');
+}
+
+function cryptoRandomString(len) {
+    const arr = new Uint8Array(len);
+    crypto.getRandomValues(arr);
+    return Array.from(arr, b => ('0' + (b & 0xff).toString(16)).slice(-2)).join('').slice(0, len);
+}
+
+async function uploadToBucket(bucket, file, prefix = '') {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${prefix}${cryptoRandomString(16)}.${fileExt}`;
+    const { data, error } = await supabaseClient.storage.from(bucket).upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+    });
+    if (error) throw error;
+    const { data: publicUrlData } = supabaseClient.storage.from(bucket).getPublicUrl(data.path);
+    return publicUrlData.publicUrl;
+}
+
+async function uploadMultipleFiles(files, bucket = BUCKET_DOCS, prefix = 'supporting/') {
+  if (!files || files.length === 0) return [];
+  
+  const fileArr = Array.from(files);
+  
+  const urls = [];
+  for (const f of fileArr) {
+    const url = await uploadToBucket(bucket, f, prefix);
+    urls.push(url);
+  }
+  return urls;
+}
+
+
+async function isTitleDuplicate(title, excludeId = null) {
+  const normalized = String(title || '').trim().toLowerCase();
+
+  const { data, error } = await supabaseClient
+    .from('manuscripts')
+    .select('id')
+    .eq('lower_title', normalized);
+
+  if (error) {
+    console.error('Error checking duplicate title:', error);
+    return false;
+  }
+
+  if (!data || data.length === 0) return false;
+
+  
+  if (excludeId) {
+    return data.some(row => row.id !== excludeId);
+  }
+  return true;
+}
+
+
+async function addNewResearchStudy() {
+  try {
+    const title = titleInput.value.trim();
+    const duplicate = await isTitleDuplicate(title);
+    if (duplicate) {
+      shakeForm();
+      showSuccessMessage('A study with this title already exists!');
+      return;
+    }
+
+    const authors = getAuthorsStringFromInputs();
+    const year = parseInt(yearInput.value, 10);
+    const department = (currentProfile && currentProfile.role === 'admin')
+      ? currentDeptName
+      : departmentSelect.value;
+
+    const program = programSelect.value;
+    const major = majorSelect.value || null;
+    const abstract = abstractTextarea.value.trim();
+
+    // 🔹 Department validation
+    if (!department) {
+      shakeForm(); 
+      showPopup("Select Department!"); // ✅ added
+      return;
+    }
+
+    // 🔹 Program validation
+    if (!program) {
+      shakeForm(); 
+      showPopup("Select Program!"); // ✅ added
+      return;
+    }
+
+    // 🔹 Abstract validation
+    if (!abstract) {
+      shakeForm();   
+      showPopup("Add Study Abstract details!"); // ✅ added
+      return;
+    }
+
+    const status = getStatusStringFromInput();
+
+    // build adviser from structured fields (editing)
+    const adviserFirst = (document.getElementById('adviserFirst') && document.getElementById('adviserFirst').value.trim()) || '';
+    const adviserMiddle = (document.getElementById('adviserMiddle') && document.getElementById('adviserMiddle').value.trim()) || '';
+    const adviserLast = (document.getElementById('adviserLast') && document.getElementById('adviserLast').value.trim()) || '';
+    const adviserSuffix = (document.getElementById('adviserSuffix') && document.getElementById('adviserSuffix').value.trim()) || '';
+
+    // 🔹 Adviser validations
+    if (!adviserFirst && !adviserLast) {
+      shakeForm(); 
+      showPopup("Add Study Adviser!"); // ✅ added
+      return;
+    }
+    if (adviserFirst && !adviserLast) {
+      shakeForm(); 
+      showPopup("Add Adviser's Last Name!"); // ✅ added
+      return;
+    }
+    if (!adviserFirst && adviserLast) {
+      shakeForm(); 
+      showPopup("Add Adviser's First Name!"); // ✅ added
+      return;
+    }
+
+    let adviserFull = adviserFirst;
+    if (adviserMiddle) adviserFull += ` ${adviserMiddle}.`;
+    adviserFull += ` ${adviserLast}`;
+    if (adviserSuffix) adviserFull += `, ${adviserSuffix}`;
+
+    const documentFile = document.getElementById('document').files[0];
+    const projectImageFile = document.getElementById('projectImage').files[0];
+    const supportingFiles = document.getElementById('supportingDocs').files; 
+
+    let document_url = null;
+    if (documentFile) {
+      document_url = await uploadToBucket(BUCKET_DOCS, documentFile, 'docs/');
+    }
+
+    let image_url;
+    if (projectImageFile) {
+      image_url = await uploadToBucket(BUCKET_IMAGES, projectImageFile, 'images/');
+    } else {
+      image_url = "https://ckuhctjmvpxffyprmatx.supabase.co/storage/v1/object/public/manuscript-images/default.png";
+    }
+
+    let supporting_urls = [];
+    if (supportingFiles && supportingFiles.length > 0) {
+      if (supportingFiles.length > 5) {
+        shakeForm();
+        showPopup("Maximum 5 supporting files allowed!"); // ✅ added
+        return;
+      }
+      supporting_urls = await uploadMultipleFiles(supportingFiles, BUCKET_DOCS, 'supporting/');
+    }
+
+    const payload = {
+      title,
+      authors,
+      year_authored: year,
+      department,
+      program,
+      major,
+      adviser: adviserFull,
+      abstract,
+      document_url,
+      image_url,
+      supporting_urls,
+      status
+    };
+
+    const { data, error } = await supabaseClient
+      .from('manuscripts')
+      .insert(payload)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    appendRow(data);
+    addStudyForm.style.display = 'none';
+    showSuccessMessage('Research study successfully added!');
+    resetFormAndState();
+  } catch (err) {
+    console.error(err);
+    showSuccessMessage('Add failed.');
+  }
+}
+
+document.addEventListener('click', function(e) {
+       const v = e.target.closest && e.target.closest('.view-btn');
+       if (!v) return;
+       e.preventDefault();
+       const row = v.closest('tr');
+       if (row) openViewModal(row);
+   });
+
+function appendRow(row) {
+    // safe defaults
+    const authorsStr = row.authors || '';
+    const statusStr = row.status || '';
+    const abstract = row.abstract || '';
+    const truncatedAbstract = abstract.length > 150 ? abstract.substring(0, 150) + '...' : abstract;
+
+    // create row element and attach attributes
+    const tr = document.createElement('tr');
+    tr.setAttribute('data-id', row.id);
+    tr.setAttribute('data-supporting', JSON.stringify(row.supporting_urls || []));
+    tr.setAttribute('data-department', row.department || '');
+
+    // determine edit permission (robust compare: trim + lowercase)
+    const rowDept = String(row.department || '').trim().toLowerCase();
+    const myDept = String(currentDeptName || '').trim().toLowerCase();
+
+    const canEdit = Boolean(currentProfile && (
+      currentProfile.role === 'super_admin' ||
+      (currentProfile.role === 'admin' && rowDept === myDept)
+    ));
+
+    // build action HTML: always show View; show Edit only if canEdit
+    const actionHtml = `
+        <div class="dropdown action-dropdown">
+            <button class="dropdown-btn">Action <i class="fas fa-caret-down"></i></button>
+            <div class="dropdown-content">
+                <a href="#" class="view-btn"><i class="fas fa-eye"></i> View</a>
+                ${canEdit ? `<a href="#" class="edit-btn"><i class="fas fa-edit"></i> Edit</a>` : ''}
+            </div>
+        </div>
+    `;
+
+    // fill row cells (keeps your existing column order)
+    tr.innerHTML = `
+        <td></td>
+        <td>${escapeHTML(row.title || '')}</td>
+        <td>${escapeHTML(authorsStr)}</td>
+        <td>${escapeHTML(row.year_authored ?? '')}</td>
+        <td>${escapeHTML(row.department || '')}</td>
+        
+        <td>${
+          row.major
+            ? escapeHTML(`${row.program} - Major in ${row.major}`)
+            : escapeHTML(row.program || '')
+        }</td>
+        <td>
+            <div class="abstract-truncated" data-full-abstract="${escapeAttr(abstract)}">
+                ${escapeHTML(truncatedAbstract)}
+            </div>
+        </td>
+        <td>${escapeHTML(row.adviser || '')}</td>
+
+<td>${
+    row.document_url 
+    ? `<a href="${escapeAttr(row.document_url)}" target="_blank">${escapeHTML(fileNameFromUrl(row.document_url))}</a>` 
+    : ``
+}</td>
+
+        <td>${
+    (row.supporting_urls && row.supporting_urls.length > 0) 
+      ? row.supporting_urls.map((url, i) =>
+          `<a href="${escapeAttr(url)}" target="_blank">${escapeHTML(fileNameFromUrl(url))}</a>`
+        ).join('<br>')
+      : ''
+}</td>
+
+<td><img src="${escapeAttr(row.image_url)}" alt="Project Image" class="project-image"></td>
+
+        <td>${escapeHTML(statusStr)}</td>
+        <td>${actionHtml}</td>
+    `;
+
+    researchTableBody.appendChild(tr);
+
+    // attach dropdown & edit/view listeners (your existing function handles missing edit-btn safely)
+    attachDropdownListeners(tr);
+    updateRowNumbers();
+}
+
+
+function fileNameFromUrl(u) {
+    try {
+        const url = new URL(u);
+        const pathname = url.pathname;
+        return decodeURIComponent(pathname.substring(pathname.lastIndexOf('/') + 1));
+    } catch {
+        return 'document';
+    }
+}
+
+function updateRowNumbers() {
+    const rows = researchTableBody.querySelectorAll('tr');
+    rows.forEach((row, index) => {
+        const firstCell = row.querySelector('td');
+        if (firstCell) firstCell.textContent = index + 1;
+    });
+    nextId = rows.length + 1;
+}
+
+function attachDropdownListeners(row) {
+    // Action dropdown toggle (safely)
+    const actionBtn = row.querySelector('.action-dropdown .dropdown-btn');
+    if (actionBtn) {
+        actionBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const dropdown = e.target.closest('.action-dropdown');
+            document.querySelectorAll('.dropdown.show').forEach(openDropdown => {
+                if (openDropdown !== dropdown) openDropdown.classList.remove('show');
+            });
+            dropdown.classList.toggle('show');
+        });
+    }
+
+    // Edit button (per-row)
+    const editBtn = row.querySelector('.edit-btn');
+    if (editBtn) {
+        editBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            openEditForm(row);
+        });
+    }
+}
+
+
+    
+
+function openViewModal(row) {
+    try {
+        const tds = row.querySelectorAll('td');
+        const title = (tds[1] && tds[1].textContent) ? tds[1].textContent.trim() : '';
+        const authorsString = (tds[2] && tds[2].textContent) ? tds[2].textContent.trim() : '';
+        const year = (tds[3] && tds[3].textContent) ? tds[3].textContent.trim() : '';
+        const department = (tds[4] && tds[4].textContent) ? tds[4].textContent.trim() : '';
+        const program = (tds[5] && tds[5].textContent) ? tds[5].textContent.trim() : '';
+
+        // Abstract is in td[6]
+        const abstractDiv = tds[6] ? tds[6].querySelector('.abstract-truncated') : null;
+        const abstract = abstractDiv ? (abstractDiv.getAttribute('data-full-abstract') || '') : '';
+
+        // Adviser is in td[7]
+        const adviser = (tds[7] && tds[7].textContent) ? tds[7].textContent.trim() : '';
+        document.getElementById('viewAdviser').textContent = adviser;
+
+        // Full document is in td[8]
+        const documentCell = tds[8];
+        const documentLink = documentCell ? documentCell.querySelector('a') : null;
+        const documentName = documentLink ? (documentLink.getAttribute('data-doc-name') || '') : '';
+        const documentHref = documentLink ? (documentLink.getAttribute('href') || '#') : '#';
+
+        // Image is in td[9]
+        const imgEl = tds[10]?.querySelector('img');
+let projectImageSrc = imgEl ? imgEl.src : '';
+
+if (projectImageSrc) {
+  // Remove any old cache version (if it exists) and force reload
+  projectImageSrc = projectImageSrc.split('?v=')[0] + `?v=${Date.now()}`;
+}
+
+const imageView = document.getElementById('projectImageView');
+if (imageView) {
+  imageView.src = projectImageSrc || 'default.png';
+}
+
+
+        // Status is in td[10]
+        const statusString = (tds[10] && tds[10].textContent) ? tds[10].textContent.trim() : '';
+
+        // supporting docs (safe)
+        const supportingJson = row.getAttribute('data-supporting') || '[]';
+        let supportingList = [];
+        try { supportingList = JSON.parse(supportingJson); } catch (e) { supportingList = []; }
+
+        const viewSupporting = document.getElementById('viewSupportingDocs');
+        if (!supportingList || supportingList.length === 0) {
+            viewSupporting.innerHTML = '';
+        } else {
+            let html = `<span class="supporting-label">Supporting Documents:</span> `;
+            html += `<a href="${escapeAttr(supportingList[0])}" target="_blank" class="supporting-link">${escapeHTML(fileNameFromUrl(supportingList[0]))}</a>`;
+            for (let i = 1; i < supportingList.length; i++) {
+                html += `<br><span style="padding-left: 160px;"></span><a href="${escapeAttr(supportingList[i])}" target="_blank" class="supporting-link">${escapeHTML(fileNameFromUrl(supportingList[i]))}</a>`;
+            }
+            viewSupporting.innerHTML = html;
+        }
+
+        const viewImageEl = document.getElementById('viewImage');
+        if (viewImageEl) viewImageEl.src = projectImageSrc || "https://ckuhctjmvpxffyprmatx.supabase.co/storage/v1/object/public/manuscript-images/default.png";
+
+        document.getElementById('viewTitle').textContent = title;
+        document.getElementById('viewAuthors').textContent = `${authorsString}${year ? ', ' + year + ' Authored' : ''}`;
+        document.getElementById('viewDeptProgram').textContent = `${department}${program ? ', ' + program : ''}`;
+        document.getElementById('viewAbstract').textContent = abstract;
+
+        const statusContainer = document.getElementById('statusContainer');
+        if (statusString) {
+            document.getElementById('viewStatus').textContent = statusString;
+            statusContainer.style.display = 'block';
+        } else {
+            statusContainer.style.display = 'none';
+        }
+
+        const viewDocumentLink = document.getElementById('viewDocumentLink');
+        if (documentLink) {
+            viewDocumentLink.style.display = 'flex';
+            viewDocumentLink.textContent = `Click to Download Full Document ${documentName}`;
+            viewDocumentLink.href = documentHref;
+        } else {
+            viewDocumentLink.style.display = 'none';
+            viewDocumentLink.href = '#';
+            viewDocumentLink.textContent = 'Click to Download Full Document';
+        }
+
+        document.getElementById('viewStudyModal').style.display = 'flex';
+    } catch (err) {
+        console.error('openViewModal error:', err);
+    }
+}
+
+function parseAuthorName(fullName) {
+  const parts = fullName.trim().split(/\s+/);
+  let last = '';
+  let first = '';
+  let middle = '';
+  let suffix = '';
+
+  if (parts.length === 0) return { first, middle, last, suffix };
+
+  
+  const lastPrefixes = ["de", "del", "dela", "de la", "de los", "san", "santa", "santo", "la", "las", "los"];
+
+  
+  if (parts.length >= 2) {
+    const twoWords = (parts[0] + ' ' + parts[1]).toLowerCase();
+    if (lastPrefixes.includes(parts[0].toLowerCase()) || lastPrefixes.includes(twoWords)) {
+      last = parts.shift() + ' ' + parts.shift(); 
+    } else {
+      last = parts.shift();
+    }
+  } else {
+    last = parts.shift();
+  }
+
+ 
+  if (parts.length > 0) {
+    first = parts.shift();
+    if (parts.length > 0 && !/^[A-Za-z]\.?$/.test(parts[0])) {
+      first += ' ' + parts.shift();
+    }
+  }
+
+  if (parts.length > 0 && /^[A-Za-z]\.?$/.test(parts[0])) {
+  middle = parts.shift().replace('.', '').charAt(0); 
+}
+
+  
+  if (parts.length > 0) {
+    suffix = parts.join(' ');
+  }
+
+  return { first, middle, last, suffix };
+
+  // parse adviser string like "Wenda D. Panes, Sr., EdD" or "Panes, Wenda D., Sr., EdD"
+function parseAdviserString(str) {
+  str = String(str || '').trim();
+  if (!str) return { first: '', middle: '', last: '', suffix: '', degree: '' };
+
+  // split on commas to separate suffix/degree
+  const parts = str.split(',').map(p => p.trim()).filter(Boolean);
+
+  // default
+  let namePart = parts[0] || '';
+  let suffix = '';
+  let degree = '';
+
+  // handle "Last, First M." style vs "First M. Last, Sr., EdD"
+  if (parts.length > 1) {
+    const p0Words = (parts[0] || '').split(/\s+/).filter(Boolean);
+    if (p0Words.length === 1 && parts[1] && parts[1].split(/\s+/).length >= 1) {
+      // format: "Last, First Middle"
+      namePart = parts[1];
+      suffix = parts[2] || '';
+      degree = parts[3] || '';
+    } else {
+      // format: "First Middle Last, Suffix, Degree"
+      suffix = parts[1] || '';
+      degree = parts[2] || '';
+    }
+  }
+
+  // parse namePart tokens
+  const tokens = namePart.split(/\s+/).filter(Boolean);
+  let first = '', middle = '', last = '';
+
+  if (tokens.length === 1) {
+    last = tokens[0];
+  } else if (tokens.length === 2) {
+    first = tokens[0];
+    last = tokens[1];
+  } else {
+    // if second token is an initial -> first, middle, rest = last
+    if (/^[A-Za-z]\.?$/.test(tokens[1])) {
+      first = tokens[0];
+      middle = tokens[1].replace('.', '');
+      last = tokens.slice(2).join(' ');
+    } else {
+      // otherwise treat everything except last as first name (handles compound first names)
+      last = tokens[tokens.length - 1];
+      first = tokens.slice(0, tokens.length - 1).join(' ');
+    }
+  }
+
+  // cleanup suffix/degree trailing dots
+  suffix = (suffix || '').replace(/\.$/, '');
+  degree = (degree || '').replace(/\.$/, '');
+
+  return {
+    first: first || '',
+    middle: middle || '',
+    last: last || '',
+    suffix: suffix || '',
+    degree: degree || ''
+  };
+}
+
+}
+
+
+async function openEditForm(row) {
+
+  
+const supportingJson = row.getAttribute('data-supporting') || '[]';
+try {
+  editingExistingSupporting = JSON.parse(supportingJson);
+} catch (e) {
+  editingExistingSupporting = [];
+}
+
+    rowToEdit = row;
+    const tds = row.querySelectorAll('td');
+    const id = row.getAttribute('data-id');
+    const title = tds[1].textContent.trim();
+    const authorsString = tds[2].textContent.trim();
+    const year = tds[3].textContent.trim();
+    const department = tds[4].textContent.trim();
+
+    // get Adviser from td[7]
+// get Adviser from td[7] and pre-fill structured adviser fields
+// Adviser
+const adviserString = (tds[7] && tds[7].textContent) ? tds[7].textContent.trim() : '';
+
+if (document.getElementById('adviserFirst')) {
+  const parsedAdviser = parseAdviserString(adviserString);
+  document.getElementById('adviserFirst').value = parsedAdviser.first || '';
+  document.getElementById('adviserMiddle').value = parsedAdviser.middle || '';
+  document.getElementById('adviserLast').value = parsedAdviser.last || '';
+  document.getElementById('adviserSuffix').value = parsedAdviser.suffix || '';
+  
+} else {
+  // fallback if old single adviser input still exists
+  const advEl = document.getElementById('adviser');
+  if (advEl) advEl.value = adviserString;
+}
+
+
+// Abstract is td[6] (existing)
+const abstract = tds[6].querySelector('.abstract-truncated').getAttribute('data-full-abstract');
+
+// Status is td[10]
+const statusString = (tds[11] && tds[11].textContent) ? tds[11].textContent.trim() : '';
+
+
+    if (
+  currentProfile &&
+  currentProfile.role === 'admin' &&
+  (String(department || '').trim().toLowerCase() !== String(currentDeptName || '').trim().toLowerCase())
+) {
+  showSuccessMessage('You are not permitted to edit this study (different department).');
+  return; // exit early, don’t show edit modal
+}
+    const program = tds[5].textContent.trim();
+    
+    titleInput.value = title;
+    
+    const authorStrings = authorsString.split(',').map(s => s.trim()).filter(Boolean);
+    const authorData = authorStrings.map(parseAuthorName);
+    
+function parseAdviserString(fullName) {
+  let result = { first: "", middle: "", last: "", suffix: "", degree: "" };
+  if (!fullName) return result;
+
+  // Split out suffix/degree (after commas)
+  let [namePart, ...restParts] = fullName.split(",");
+  namePart = namePart.trim();
+  let extras = restParts.map(r => r.trim());
+
+  extras.forEach(extra => {
+    if (/^(Jr\.|Sr\.|II|III|IV)$/i.test(extra)) {
+      result.suffix = extra;
+    } else if (extra) {
+      result.degree = extra;
+    }
+  });
+
+  // Split namePart into tokens
+  let tokens = namePart.split(/\s+/); // e.g. ["Wenda", "D.", "Panes"]
+
+  if (tokens.length > 0) result.first = tokens[0];
+  if (tokens.length === 2) {
+    result.last = tokens[1];
+  } else if (tokens.length >= 3) {
+    result.middle = tokens.slice(1, -1).join(" ");
+    result.last = tokens[tokens.length - 1];
+  }
+
+  return result;
+}
+
+
+    authorsInput.value = authorData.length;
+    createAuthorFields(authorData.length, authorData);
+
+    yearInput.value = year;
+
+    
+    const programCellText = program; 
+    let programOnly = programCellText;
+    let majorFromCell = null;
+    const m = programCellText.match(/^(.*?)\s*-\s*Major in\s*(.*)$/i);
+    if (m) {
+      programOnly  = m[1].trim();
+      majorFromCell = m[2].trim();
+    }
+
+    
+    departmentSelect.value = department;
+
+    
+    await populateProgramsForDepartment(department);
+// If user is admin, lock the department select to their dept
+if (currentProfile && currentProfile.role === 'admin') {
+  departmentSelect.value = currentDeptName || department;
+  departmentSelect.disabled = true;
+} else {
+  departmentSelect.disabled = false;
+}
+
+   
+    programSelect.value = programOnly;
+    if (programSelect.value !== programOnly) {
+      for (let i = 0; i < programSelect.options.length; i++) {
+        if (programSelect.options[i].textContent.trim() === programOnly) {
+          programSelect.selectedIndex = i;
+          break;
+        }
+      }
+    }
+
+    
+    handleProgramChange();
+    if (majorFromCell) {
+      majorSelect.value = majorFromCell;
+      
+      if (majorSelect.value !== majorFromCell) {
+        for (let i = 0; i < majorSelect.options.length; i++) {
+          if (majorSelect.options[i].textContent.trim() === majorFromCell) {
+            majorSelect.selectedIndex = i;
+            break;
+          }
+        }
+      }
+    }
+
+    abstractTextarea.value = abstract;
+
+    const statusCheckboxes = document.querySelectorAll('input[name="status"]');
+    statusCheckboxes.forEach(cb => {
+        cb.checked = statusString.split(', ').includes(cb.value);
+    });
+
+    step1.style.display = 'block';
+    step2.style.display = 'block';
+    document.getElementById('step1-buttons').style.display = 'none';
+
+    const step2Buttons = document.getElementById('step2-buttons');
+step2Buttons.innerHTML = `
+    <button type="button" class="cancel-btn" id="cancelEditStudy">Cancel</button>
+    <button type="button" class="save-btn" id="submitBtn">Save Changes</button>
+`;
+
+    document.getElementById('cancelEditStudy').addEventListener('click', () => {
+        addStudyForm.style.display = 'none';
+        resetFormAndState();
+    });
+    
+
+    addStudyForm.style.display = 'flex';
+    document.querySelector('.form-header h2').innerHTML = `<i class="fas fa-edit"></i> Edit Research Manuscript`;
+
+    currentEditingId = id;
+}
+
+async function loadDepartmentsAndPrograms() {
+  const deptSelect = document.getElementById('department');
+  try {
+    const { data: programs, error: progError } = await supabaseClient
+      .from('programs')
+      .select('department, program_name, majors')
+      .order('department', { ascending: true })
+      .order('program_name', { ascending: true });
+
+    if (progError) throw progError;
+
+    const uniqueDepts = Array.from(new Set((programs || []).map(p => p.department))).filter(Boolean).sort();
+
+    deptSelect.innerHTML = '';
+
+    // If user is admin -> only show their department and disable selector
+    if (currentProfile && currentProfile.role === 'admin') {
+      if (!currentDeptName) {
+        // fallback: still show all but disable
+        uniqueDepts.forEach(d => {
+          const opt = document.createElement('option'); opt.value = d; opt.textContent = d; deptSelect.appendChild(opt);
+        });
+        deptSelect.disabled = true;
+        console.warn('Admin profile loaded but currentDeptName missing.');
+        return;
+      }
+      const opt = document.createElement('option');
+      opt.value = currentDeptName;
+      opt.textContent = currentDeptName;
+      deptSelect.appendChild(opt);
+      deptSelect.disabled = true;
+
+      // load programs for this dept
+      await populateProgramsForDepartment(currentDeptName);
+      return;
+    }
+
+    // super_admin / other users: show all departments
+    uniqueDepts.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d;
+      opt.textContent = d;
+      deptSelect.appendChild(opt);
+    });
+
+    deptSelect.addEventListener('change', async () => {
+      const selectedDept = deptSelect.value;
+      await populateProgramsForDepartment(selectedDept);
+    });
+
+    if (deptSelect.options.length > 0) {
+      deptSelect.selectedIndex = 0;
+      await populateProgramsForDepartment(deptSelect.value);
+    }
+  } catch (err) {
+    console.error('Error loading departments/programs:', err);
+    deptSelect.innerHTML = '<option value="">(failed to load)</option>';
+  }
+}
+
+// --- add this after appendRow (or anywhere above saveEditedStudy) ---
+function updateTableRow(rowEl, rowData) {
+  try {
+    if (!rowEl || !rowData) return;
+
+    const authorsStr = rowData.authors || '';
+    const abstract = rowData.abstract || '';
+    const truncatedAbstract = abstract.length > 150 ? abstract.substring(0, 150) + '.' : abstract;
+    const statusStr = Array.isArray(rowData.status) ? rowData.status.join(', ') : (rowData.status || '');
+
+    // determine edit permission same as appendRow
+    const rowDept = String(rowData.department || '').trim().toLowerCase();
+    const myDept = String(currentDeptName || '').trim().toLowerCase();
+    const canEdit = Boolean(currentProfile && (
+      currentProfile.role === 'super_admin' ||
+      (currentProfile.role === 'admin' && rowDept === myDept)
+    ));
+
+    const actionHtml = `
+      <div class="dropdown action-dropdown">
+        <button class="dropdown-btn">Action <i class="fas fa-caret-down"></i></button>
+        <div class="dropdown-content">
+          <a href="#" class="view-btn"><i class="fas fa-eye"></i> View</a>
+          ${canEdit ? `<a href="#" class="edit-btn"><i class="fas fa-edit"></i> Edit</a>` : ''}
+        </div>
+      </div>
+    `;
+
+    // update attributes
+    rowEl.setAttribute('data-id', rowData.id);
+    rowEl.setAttribute('data-supporting', JSON.stringify(rowData.supporting_urls || []));
+    rowEl.setAttribute('data-department', rowData.department || '');
+
+    // replace row HTML using same column order/template as appendRow
+    rowEl.innerHTML = `
+      <td></td>
+      <td>${escapeHTML(rowData.title || '')}</td>
+      <td>${escapeHTML(authorsStr)}</td>
+      <td>${escapeHTML(rowData.year_authored ?? '')}</td>
+      <td>${escapeHTML(rowData.department || '')}</td>
+      <td>${
+        rowData.major
+          ? escapeHTML(`${rowData.program} - Major in ${rowData.major}`)
+          : escapeHTML(rowData.program || '')
+      }</td>
+      <td>
+        <div class="abstract-truncated" data-full-abstract="${escapeAttr(abstract)}">
+          ${escapeHTML(truncatedAbstract)}
+        </div>
+      </td>
+      <td>${escapeHTML(rowData.adviser || '')}</td>
+
+      <td>${
+        rowData.document_url 
+          ? `<a href="${escapeAttr(rowData.document_url)}" target="_blank">${escapeHTML(fileNameFromUrl(rowData.document_url))}</a>`
+          : ``
+      }</td>
+
+      <td>${
+        (rowData.supporting_urls && rowData.supporting_urls.length > 0)
+          ? rowData.supporting_urls.map((url) =>
+              `<a href="${escapeAttr(url)}" target="_blank">${escapeHTML(fileNameFromUrl(url))}</a>`
+            ).join('<br>')
+          : ''
+      }</td>
+
+      <td><img src="${escapeAttr(rowData.image_url || 'https://ckuhctjmvpxffyprmatx.supabase.co/storage/v1/object/public/manuscript-images/default.png')}" alt="Project Image" class="project-image"></td>
+
+      <td>${escapeHTML(statusStr)}</td>
+      <td>${actionHtml}</td>
+    `;
+
+    // reattach listeners for action dropdown / edit / view on this row
+    attachDropdownListeners(rowEl);
+    updateRowNumbers();
+  } catch (err) {
+    console.error('updateTableRow error:', err);
+  }
+}
+
+
+async function saveEditedStudy() {
+  try {
+    if (!rowToEdit || !currentEditingId) return;
+
+    const title = titleInput.value.trim();
+    const duplicate = await isTitleDuplicate(title, currentEditingId);
+    if (duplicate) {
+      shakeForm();
+      showPopup("Another study with this title already exists!");
+      return;
+    }
+
+    const authors = getAuthorsStringFromInputs();
+    const year = parseInt(yearInput.value, 10);
+    if (!year || isNaN(year) || year < 2000) {
+      shakeForm();
+      showPopup("Enter a valid Year (2000 or later)!");
+      return;
+    }
+
+    const department = (currentProfile && currentProfile.role === 'admin')
+      ? currentDeptName
+      : departmentSelect.value;
+    if (!department) {
+      shakeForm();
+      showPopup("Select Department!");
+      return;
+    }
+
+    const program = programSelect.value;
+    if (!program) {
+      shakeForm();
+      showPopup("Select Program!");
+      return;
+    }
+
+    // 🔹 Title required
+if (!title) {
+  shakeForm();
+  showPopup("Add Research Study Title!");
+  return;
+}
+
+// 🔹 Authors required (must have at least one)
+const authorGroups = authorFieldsContainer.querySelectorAll('.author-name-group');
+if (authorGroups.length === 0) {
+  shakeForm();
+  showPopup("Add Study Author/s!");
+  return;
+}
+
+// 🔹 Check first & last name of main author
+const main = authorGroups[0];
+const mainFirst = (main.querySelector('.author-first') || { value: '' }).value.trim();
+const mainLast = (main.querySelector('.author-last') || { value: '' }).value.trim();
+
+if (mainFirst && !mainLast) { shakeForm(); showPopup("Add Author's Last Name!"); return; }
+if (!mainFirst && mainLast) { shakeForm(); showPopup("Add Author's First Name!"); return; }
+if (!mainFirst && !mainLast) { shakeForm(); showPopup("Add Study Author/s!"); return; }
+
+
+    const major = document.getElementById('major').value || null;
+
+    const abstract = abstractTextarea.value.trim();
+    if (!abstract) {
+      shakeForm();
+      showPopup("Add Study Abstract details!");
+      return;
+    }
+
+    const status = getStatusStringFromInput();
+
+    // Adviser fields
+    const adviserFirst = (document.getElementById('adviserFirst')?.value.trim()) || '';
+    const adviserMiddle = (document.getElementById('adviserMiddle')?.value.trim()) || '';
+    const adviserLast  = (document.getElementById('adviserLast')?.value.trim()) || '';
+    const adviserSuffix= (document.getElementById('adviserSuffix')?.value.trim()) || '';
+
+    if (!adviserFirst && !adviserLast) {
+      shakeForm(); showPopup("Add Study Adviser!"); return;
+    }
+    if (adviserFirst && !adviserLast) {
+      shakeForm(); showPopup("Add Adviser's Last Name!"); return;
+    }
+    if (!adviserFirst && adviserLast) {
+      shakeForm(); showPopup("Add Adviser's First Name!"); return;
+    }
+
+    let adviserFull = adviserFirst;
+    if (adviserMiddle) adviserFull += ` ${adviserMiddle}.`;
+    adviserFull += ` ${adviserLast}`;
+    if (adviserSuffix) adviserFull += `, ${adviserSuffix}`;
+
+    // ✅ Build payload (details only, no file uploads here)
+   // --- FILE UPLOAD HANDLING (added for editing) ---
+let document_url, image_url, supporting_urls;
+
+// Full Document
+const documentFile = document.getElementById('document').files[0];
+if (documentFile) {
+  document_url = await uploadToBucket(BUCKET_DOCS, documentFile, 'docs/');
+}
+
+// Study Image
+const projectImageFile = document.getElementById('projectImage').files[0];
+if (projectImageFile) {
+  image_url = await uploadToBucket(BUCKET_IMAGES, projectImageFile, 'images/');
+}
+
+// Supporting Documents
+const supportingFiles = document.getElementById('supportingDocs').files;
+if (supportingFiles && supportingFiles.length > 0) {
+  supporting_urls = await uploadMultipleFiles(supportingFiles, BUCKET_DOCS, 'supporting/');
+}
+
+// --- BUILD UPDATE PAYLOAD ---
+const updatePayload = {
+  title,
+  authors,
+  year_authored: year,
+  department,
+  program,
+  major,
+  adviser: adviserFull,
+  abstract,
+  status,
+};
+// --- handle file updates/clears ---
+if (document_url) {
+  updatePayload.document_url = document_url;
+} else if (documentCleared) {
+  updatePayload.document_url = null;
+}
+
+if (image_url) {
+  updatePayload.image_url = image_url;
+} else if (imageCleared) {
+  // set back to default Supabase image
+  updatePayload.image_url = "https://ckuhctjmvpxffyprmatx.supabase.co/storage/v1/object/public/manuscript-images/default.png";
+}
+
+
+if (supporting_urls && supporting_urls.length > 0) {
+  updatePayload.supporting_urls = supporting_urls;
+} else if (supportingCleared) {
+  updatePayload.supporting_urls = null;
+}
+
+
+    const { data, error } = await supabaseClient
+      .from('manuscripts')
+      .update(updatePayload)
+      .eq('id', currentEditingId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    updateTableRow(rowToEdit, data);
+    // Force refresh of table image too
+if (data.image_url) {
+  const img = rowToEdit.querySelector('img');
+  if (img) img.src = `${data.image_url}?v=${Date.now()}`;
+}
+
+    addStudyForm.style.display = 'none';
+    showSuccessMessage('Study details successfully updated!');
+    resetFormAndState();
+
+  } catch (err) {
+    console.error("saveEditedStudy error:", err);
+    showPopup('Update failed: ' + (err.message || 'Unknown error'));
+  }
+}
+
+
+async function loadManuscripts() {
+  researchTableBody.innerHTML = '';
+  try {
+    let manuscriptsQuery = supabaseClient
+      .from('manuscripts')
+      .select('*')
+      .order('year_authored', { ascending: false });
+
+    if (currentProfile && currentProfile.role === 'admin') {
+      if (!currentDeptName) { console.warn('Admin has no department name resolved; no manuscripts will be shown.'); return; }
+      manuscriptsQuery = manuscriptsQuery.eq('department', currentDeptName);
+    }
+
+    const { data, error } = await manuscriptsQuery;
+    if (error) throw error;
+    (data || []).forEach(row => appendRow(row));
+  } catch (err) {
+    console.error('loadManuscripts error:', err);
+  }
+}
+
+
+
+
+authorsInput.addEventListener('input', () => {
+    let num = parseInt(authorsInput.value, 10);
+    if (isNaN(num) || num < 1) num = 1;
+    createAuthorFields(num);
+});
+
+menuToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('active');
+    mainContent.classList.toggle('active');
+});
+
+adminProfileBtn.addEventListener("click", function(e) {
+    e.stopPropagation();
+    adminDropdown.style.display = adminDropdown.style.display === "block" ? "none" : "block";
+});
+
+window.addEventListener("click", function(e) {
+    if (!adminProfileBtn.contains(e.target)) {
+        adminDropdown.style.display = "none";
+    }
+});
+
+document.getElementById('openAddStudy').addEventListener('click', async () => {
+    resetFormAndState(); // clear old values first
+
+    // if admin, ensure department is their department and programs loaded
+    if (currentProfile && currentProfile.role === 'admin') {
+      if (currentDeptName) {
+        // set department select to only that dept and disable
+        departmentSelect.innerHTML = '';
+        const opt = document.createElement('option'); opt.value = currentDeptName; opt.textContent = currentDeptName;
+        departmentSelect.appendChild(opt);
+        departmentSelect.disabled = true;
+        await populateProgramsForDepartment(currentDeptName);
+      } else {
+        console.warn('currentDeptName missing for admin.');
+      }
+    } else {
+      // super_admin: allow choosing
+      departmentSelect.disabled = false;
+      // ensure programs for currently-selected dept are loaded
+      if (departmentSelect.value) await populateProgramsForDepartment(departmentSelect.value);
+    }
+
+    addStudyForm.style.display = 'flex';
+    step1.style.display = 'block';
+    step2.style.display = 'none';
+    document.getElementById('step1-buttons').style.display = 'flex';
+    document.getElementById('step2-buttons').style.display = 'none';
+    document.querySelector('.form-header h2').innerHTML = `<i class="fas fa-folder-open"></i> Research Study Details`;
+});
+
+// --- helpers ---
+function showPopup(message) {
+  // if you already have a custom popup (like showSuccessMessage), use it
+  if (typeof showSuccessMessage === 'function') {
+    showSuccessMessage(message);
+  } else {
+    alert(message);
+  }
+}
+
+function showSuccessMessage(message, options = {}) {
+  const duration = typeof options.duration === 'number' ? options.duration : 2500;
+  const isError = !!options.isError;
+
+  const el = document.getElementById('successMessage');
+  if (!el) {
+    if (isError) alert('Error: ' + message);
+    else alert(message);
+    return;
+  }
+
+  const safeMsg = typeof escapeHTML === 'function' ? escapeHTML(String(message)) : String(message);
+  const icon = isError ? 'fa-exclamation-triangle' : 'fa-check-circle';
+  el.innerHTML = `<i class="fas ${icon}"></i> ${safeMsg}`;
+  el.style.display = 'flex';
+
+  const secs = Math.max(2, Math.ceil(duration / 1000));
+  el.style.animation = `fadeInOut ${secs}s ease forwards`;
+
+  if (el._hideTimer) clearTimeout(el._hideTimer);
+  el._hideTimer = setTimeout(() => {
+    el.style.display = 'none';
+    el.style.animation = 'none';
+  }, duration);
+}
+
+function shakeForm() {
+  const content = document.querySelector('.form-content');
+  if (!content) return;
+  content.classList.remove('shake');
+  void content.offsetWidth; // restart animation
+  content.classList.add('shake');
+}
+
+searchInput.addEventListener('input', () => {
+    const searchTerm = searchInput.value.toLowerCase();
+    const rows = researchTableBody.querySelectorAll('tr');
+    rows.forEach(row => {
+        const rowText = row.textContent.toLowerCase();
+        row.style.display = rowText.includes(searchTerm) ? '' : 'none';
+    });
+});
+
+function resetFormAndState() {
+    titleInput.value = '';
+    authorsInput.value = 1;
+    yearInput.value = '';
+    departmentSelect.value = '';
+    programSelect.value = '';
+    abstractTextarea.value = '';
+    document.getElementById('document').value = '';
+document.getElementById('projectImage').value = '';
+document.getElementById('supportingDocs').value = '';
+editingExistingSupporting = [];
+
+// reset cleared flags
+documentCleared = false;
+imageCleared = false;
+supportingCleared = false;
+
+
+
+
+    
+    majorSelect.innerHTML = '';
+    majorLabel.style.display  = 'none';
+    majorSelect.style.display = 'none';
+
+    const checkboxes = document.querySelectorAll('input[name="status"]');
+    checkboxes.forEach(cb => cb.checked = false);
+
+    createAuthorFields(1);
+    rowToEdit = null;
+    currentEditingId = null;
+
+    const step2Buttons = document.getElementById('step2-buttons');
+    step2Buttons.innerHTML = `
+        <button type="button" class="cancel-btn" id="backToStep1">Back</button>
+        <button type="button" class="add-btn" id="submitBtn">Add</button>
+    `;
+
+    document.getElementById('backToStep1').addEventListener('click', () => {
+        step1.style.display = 'block';
+        step2.style.display = 'none';
+        document.getElementById('step1-buttons').style.display = 'flex';
+        document.getElementById('step2-buttons').style.display = 'none';
+    });
+
+    // after step2Buttons.innerHTML assignment:
+const backToStep1 = document.getElementById('backToStep1');
+if (backToStep1) {
+    backToStep1.addEventListener('click', () => {
+        step1.style.display = 'block';
+        step2.style.display = 'none';
+        document.getElementById('step1-buttons').style.display = 'flex';
+        document.getElementById('step2-buttons').style.display = 'none';
+    });
+}
+ // clear adviser structured fields
+const advFirst = document.getElementById('adviserFirst');
+if (advFirst) advFirst.value = '';
+const advMid = document.getElementById('adviserMiddle');
+if (advMid) advMid.value = '';
+const advLast = document.getElementById('adviserLast');
+if (advLast) advLast.value = '';
+const advSuffix = document.getElementById('adviserSuffix');
+if (advSuffix) advSuffix.value = '';
+
+
+}
+
+function shakeForm() {
+    const formBox = document.querySelector('.form-content');
+    if (formBox) {
+        formBox.classList.add('shake');
+        setTimeout(() => formBox.classList.remove('shake'), 400);
+    }
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  (async () => {
+    try {
+      // 1) load user profile first (populates currentProfile & currentDeptName)
+      await loadCurrentUserProfile();
+
+      console.log('currentProfile', currentProfile);
+console.log('currentDeptName', currentDeptName);
+
+
+      // 2) then setup UI controls that depend on profile
+      createAuthorFields(1);
+      await loadDepartmentsAndPrograms(); // respects currentProfile now
+      await loadManuscripts();            // will be filtered for admins
+
+      document.getElementById('closeViewModal').addEventListener('click', () => {
+        document.getElementById('viewStudyModal').style.display = 'none';
+      });
+    } catch (err) {
+      console.error('Startup error', err);
+    }
+  })();
+});
+
+
+// ---------- REPLACEMENT submit handler (delegated) ----------
+document.addEventListener('click', async (e) => {
+    // handle clicks on dynamically-created #submitBtn (works even if button is recreated)
+    const btn = e.target.closest && e.target.closest('#submitBtn');
+    if (!btn) return;
+
+    // validations
+    if (!validateFiles()) return;
+    if (!validateYear() || !validateUniqueAuthors()) return;
+
+    const abstractText = abstractTextarea.value.trim();
+
+    try {
+        if (btn.classList.contains('add-btn')) {
+    await addNewResearchStudy();
+} else if (btn.classList.contains('save-btn')) {
+    await saveEditedStudy();
+}
+
+    } catch (err) {
+        console.error('Submit handler error:', err);
+        showSuccessMessage('Operation failed.');
+    }
+});
+// ------------------------------------------------------------
+
+</script>
+</body>
+</html>
